@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="author" content="Сидорчук Н.В.">
+<title>Рівняння прямої — для телефона</title>
+<style>
+:root{--bg:#e9ede8;--paper:#ffffff;--ink:#17231c;--muted:#56665b;--acc:#1f7a52;--acc-soft:#e3f1e9;--acc2:#c0532a;--acc2-soft:#fbe9e1;--blue:#2d5fb8;--purple:#7d3fa8;--rule:#cdd6cf;--grid:#d9e0da;--ok:#1f7a52;--bad:#c0392b;--ans:#eef2ee}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#1c2620;overflow:hidden}
+body{font-family:"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--ink);-webkit-user-select:none;user-select:none;touch-action:manipulation}
+#stage{position:absolute;left:0;top:0;width:1600px;height:900px;transform-origin:0 0;background:var(--bg);display:flex;flex-direction:column}
+/* верхня смуга розділів */
+#nav{display:flex;gap:8px;padding:12px 16px 10px;background:var(--paper);border-bottom:2px solid var(--rule)}
+#nav button{flex:1;font-family:inherit;font-weight:600;font-size:17px;line-height:1.2;border:2px solid var(--rule);background:var(--paper);color:var(--muted);border-radius:12px;padding:8px 6px;cursor:pointer;text-align:left;display:flex;gap:8px;align-items:center}
+#nav button b{flex:none;width:30px;height:30px;border-radius:50%;background:var(--rule);color:var(--ink);display:grid;place-items:center;font-size:17px}
+#nav button.cur{border-color:var(--acc);color:var(--ink);background:var(--acc-soft)}
+#nav button.cur b{background:var(--acc);color:#fff}
+#nav button.home{flex:none;width:58px;justify-content:center;font-size:24px}
+/* слайди */
+#slides{flex:1;position:relative;overflow:hidden}
+.slide{position:absolute;inset:0;padding:22px 48px 10px;display:none;font-size:31px;line-height:1.38}
+.slide.cur{display:block}
+.slide h2{margin:0 0 14px;font-size:46px;line-height:1.15;display:flex;align-items:baseline;gap:18px}
+.slide h2 .tag{font-size:22px;font-weight:600;color:#fff;background:var(--acc);border-radius:10px;padding:4px 12px;white-space:nowrap}
+.slide h2 .tag.chk{background:var(--blue)}
+.slide h2 .tag.do{background:var(--acc2)}
+.slide p{margin:10px 0}
+.cols{display:grid;grid-template-columns:1fr auto;gap:36px;align-items:start}
+.box{background:var(--paper);border-radius:18px;padding:14px 26px;border:3px solid var(--acc);margin:10px 0}
+.box.soft{border-color:var(--rule)}
+.box.warm{border-color:var(--acc2);background:var(--acc2-soft)}
+.big{font-size:60px;font-weight:700;color:var(--acc);text-align:center;margin:6px 0;letter-spacing:1px}
+.mid{font-size:40px;font-weight:700;color:var(--acc)}
+.muted{color:var(--muted)}
+.small{font-size:26px}
+.hl{color:var(--acc);font-weight:700}
+.hl2{color:var(--acc2);font-weight:700}
+ol.st{margin:6px 0;padding-left:44px}ol.st li{margin:8px 0}
+ul.ls{margin:6px 0;padding-left:34px}ul.ls li{margin:6px 0}
+table{border-collapse:collapse;background:var(--paper);font-size:29px}
+td,th{border:2px solid var(--rule);padding:8px 16px;text-align:left}
+th{background:var(--acc-soft)}
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;font-size:.82em;line-height:1.12;margin:0 3px}
+.fr>span:first-child{border-bottom:2px solid currentColor;padding:0 3px}
+.rt{white-space:nowrap}.rt>span{border-top:2px solid currentColor;padding:0 2px 0 1px;margin-left:-1px}
+.v{font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:inherit}
+.no{text-decoration:line-through;text-decoration-color:var(--acc2);text-decoration-thickness:3px}
+/* кроки, що відкриваються */
+.step{visibility:hidden}
+.step.on{visibility:visible;animation:pop .35s ease}
+@keyframes pop{from{opacity:0}to{opacity:1}}
+/* відповідь, що відкривається дотиком */
+.ans{display:inline-block;min-width:110px;min-height:1.2em;border-radius:10px;background:repeating-linear-gradient(-45deg,#dfe7e0 0 10px,#eef2ee 10px 20px);border:2px dashed #a9b8ad;cursor:pointer;padding:0 10px;vertical-align:middle;text-align:center}
+.ans>span{visibility:hidden}
+.ans.open{background:var(--acc-soft);border:2px solid var(--acc);color:var(--acc);font-weight:700}
+.ans.open>span{visibility:visible}
+/* варіанти відповідей */
+.opts{display:flex;flex-wrap:wrap;gap:16px;margin:14px 0}
+.opt{font:inherit;font-size:31px;border:3px solid var(--rule);background:var(--paper);color:var(--ink);border-radius:16px;padding:12px 24px;cursor:pointer;position:relative;min-width:200px;text-align:left}
+.opt.right{border-color:var(--ok);background:#dff1e6}
+.opt.wrong{border-color:var(--bad);background:#f8e1de}
+.opt.right::after{content:" ✓";color:var(--ok);font-weight:700}
+.opt.wrong::after{content:" ✗";color:var(--bad);font-weight:700}
+.grid-opts{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.mrow{display:grid;grid-template-columns:300px repeat(3,1fr);gap:14px;align-items:center;margin:10px 0}
+.mrow .eq{font-weight:700;font-size:34px}
+.mrow .opt{min-width:0;text-align:center;padding:8px 10px;font-size:27px}
+/* фігури */
+.fig svg{display:block}
+svg .g{stroke:var(--grid);stroke-width:1.2}
+svg .ax{stroke:var(--ink);stroke-width:2}
+svg .ah{fill:var(--ink)}
+svg .al{fill:var(--ink);font:italic 700 22px Georgia,serif}
+svg .tk{fill:var(--muted);font:17px "Segoe UI",Arial,sans-serif}
+svg .ln{stroke-width:4;stroke-linecap:round}
+svg .c1{stroke:var(--acc)} svg text.c1{fill:var(--acc)}
+svg .c2{stroke:var(--acc2)} svg text.c2{fill:var(--acc2)}
+svg .c3{stroke:var(--blue)} svg text.c3{fill:var(--blue)}
+svg .c4{stroke:var(--purple)} svg text.c4{fill:var(--purple)}
+svg .ll{font:italic 700 24px "Segoe UI",Arial,sans-serif;stroke:#fff;stroke-width:6px;paint-order:stroke;stroke-linejoin:round}
+svg .pt{fill:var(--ink)}
+svg .pt.ok{fill:var(--ok)} svg .pt.bad{fill:var(--bad)}
+svg .pl{fill:var(--ink);font:700 22px "Segoe UI",Arial,sans-serif;stroke:#fff;stroke-width:6px;paint-order:stroke;stroke-linejoin:round}
+svg .sg{stroke:var(--ink);stroke-width:3}
+svg .dash{stroke-dasharray:8 6;stroke-width:2.2;stroke:var(--muted)}
+svg .leg{stroke:var(--acc2);stroke-width:5;stroke-linecap:round}svg .leg.la{stroke:var(--acc)}
+svg .mk{fill:none;stroke:var(--ink);stroke-width:2.2}
+svg .fill{fill:var(--acc2);fill-opacity:.18;stroke:none}
+svg .drag{fill:var(--acc2);stroke:#fff;stroke-width:3;cursor:grab}
+/* повзунки */
+.ctl{background:var(--paper);border-radius:18px;padding:12px 22px;border:3px solid var(--rule);margin:10px 0}
+.ctl label{display:flex;align-items:center;gap:16px;font-weight:700;margin:6px 0}
+.ctl input[type=range]{flex:1;height:44px;accent-color:var(--acc)}
+.ctl output{min-width:110px;text-align:right;font-size:34px}
+.btn{font:inherit;font-size:27px;font-weight:600;border:0;border-radius:14px;padding:12px 22px;background:var(--acc);color:#fff;cursor:pointer;margin:6px 8px 6px 0}
+.btn.alt{background:var(--paper);color:var(--ink);border:3px solid var(--rule)}
+.readout{font-size:34px;font-weight:700;margin:8px 0}
+.readout .eqok{color:var(--ok)}.readout .eqno{color:var(--bad)}
+/* титул і зміст */
+.title h1{font-size:84px;margin:30px 0 4px;color:var(--acc)}
+.toc{display:grid;grid-template-columns:repeat(2,1fr);gap:12px 26px;margin-top:20px}
+.toc button{font:inherit;font-size:31px;text-align:left;border:3px solid var(--rule);background:var(--paper);border-radius:16px;padding:12px 18px;cursor:pointer;display:flex;gap:16px;align-items:center;color:var(--ink)}
+.toc button b{flex:none;width:48px;height:48px;border-radius:50%;background:var(--acc);color:#fff;display:grid;place-items:center}
+.secslide{display:none}
+.slide.secopen{display:none}
+.cover{display:flex!important;flex-direction:column;justify-content:center}
+.slide.cover:not(.cur){display:none!important}
+.cover .num{font-size:150px;font-weight:800;color:var(--acc);line-height:1}
+.cover h1{font-size:76px;margin:6px 0 18px}
+.cover .what{font-size:34px;color:var(--muted)}
+.card .fig.sgf svg{width:250px}.sch{display:inline-block;vertical-align:middle;margin-right:12px}.sch svg{width:96px;height:96px;display:block}.sgrow{font-size:32px;font-weight:800;margin:6px 0;display:flex;align-items:center;justify-content:center;gap:8px}.sgp{display:inline-flex}.sgp select{font:inherit;font-size:32px;font-weight:800;width:92px;height:58px;border-radius:12px;border:3px solid var(--rule);background:#fff;color:var(--ink);text-align:center;text-align-last:center;cursor:pointer}.sgp.right select{border-color:var(--ok);background:#dff1e6}.sgp.wrong select{border-color:var(--bad);background:#f8e1de}.sgp button{font:inherit;font-size:30px;width:54px;height:54px;border-radius:12px;border:3px solid var(--rule);background:#fff;cursor:pointer;color:var(--ink);padding:0}.sgp button.on{border-color:var(--acc2);background:#fbe9df}.sgp.right button.on{border-color:var(--ok);background:#dff1e6}.sgp.wrong button.on{border-color:var(--bad);background:#f8e1de}
+.cards{display:flex;gap:22px;justify-content:space-between;margin-top:8px}
+.card{background:var(--paper);border:3px solid var(--rule);border-radius:18px;padding:10px 12px 12px;flex:1;display:flex;flex-direction:column;align-items:center}
+.card .fig svg{width:100%;height:auto}
+.card .cap{text-align:center;font-size:28px;line-height:1.3;margin-top:6px}
+.card .eqn{font-weight:700;font-size:30px;color:var(--acc)}
+.card .sign{font-size:34px;font-weight:800}
+
+
+/* введення чисел */
+input.num{font:inherit;font-size:32px;font-weight:700;width:120px;height:56px;text-align:center;border:3px solid var(--rule);border-radius:12px;background:#fff;color:var(--ink);user-select:text;-webkit-user-select:text}
+input.num:focus{outline:none;border-color:var(--acc2);box-shadow:0 0 0 4px rgba(192,83,42,.25)}
+input.num.right{border-color:var(--ok);background:#dff1e6;color:var(--ok)}
+input.num.wrong{border-color:var(--bad);background:#f8e1de;color:var(--bad)}
+.keypad{display:grid;grid-template-columns:repeat(3,92px);gap:10px;margin-top:0}
+.keypad button{font:inherit;font-size:36px;font-weight:700;height:74px;border-radius:16px;border:3px solid var(--rule);background:var(--paper);cursor:pointer;color:var(--ink)}
+.keypad button:active{background:var(--acc-soft)}
+/* сортування */
+.pool{display:flex;flex-wrap:wrap;gap:14px;min-height:76px;padding:10px;border:3px dashed var(--rule);border-radius:16px;background:rgba(255,255,255,.5)}
+.bins{display:grid;gap:18px;margin-top:16px}
+.bin{min-height:200px;border:3px solid var(--acc);border-radius:18px;background:var(--paper);padding:8px 10px 12px;display:flex;flex-wrap:wrap;align-content:flex-start;gap:12px;cursor:pointer}
+.bin .bh{width:100%;font-weight:800;font-size:28px;color:var(--acc);text-align:center;border-bottom:2px solid var(--rule);padding-bottom:6px}
+.bin.over{background:var(--acc-soft)}
+.card2{font-size:31px;font-weight:600;background:#fff;border:3px solid var(--rule);border-radius:14px;padding:8px 18px;cursor:grab;touch-action:none;position:relative;z-index:1}
+.card2.sel{border-color:var(--acc2);box-shadow:0 0 0 5px rgba(192,83,42,.3)}
+.card2.drag{z-index:50;box-shadow:0 10px 24px rgba(0,0,0,.25);cursor:grabbing}
+.card2.right{border-color:var(--ok);background:#dff1e6}
+.card2.wrong{border-color:var(--bad);background:#f8e1de;animation:shake .4s}
+table.der{font-size:26px}
+table.der td{vertical-align:middle;padding:8px 12px;white-space:nowrap}
+table.der td:last-child{white-space:normal;text-align:center}
+table.der .eg{font-size:23px;color:var(--muted);margin-top:6px}
+.ch{background:#eef2ee;border-radius:8px;padding:1px 7px;white-space:nowrap}
+.res{display:inline-block;vertical-align:middle;line-height:1.2;background:var(--acc-soft);color:var(--acc);font-weight:800;border:2px solid var(--acc);border-radius:8px;padding:3px 8px;white-space:nowrap}
+.arw{color:var(--acc2);font-weight:800;margin:0 7px}
+.arw.sm{margin:0 5px}
+.z{color:var(--acc2);font-weight:800}
+.exr{color:var(--acc)}
+.cx{color:var(--blue);font-weight:800}
+.cy{color:var(--purple);font-weight:800}
+.z8 p{margin:0 0 8px;font-size:27px}.z8 .gl{font-size:26px;margin:4px 0}.tr-msg .eqok{color:var(--ok)}.tr-msg .eqno{color:var(--bad)}.z5 p{font-size:28px;margin:0 0 10px}.z5 .gl{font-size:28px;margin:4px 0 4px 10px}.z5{gap:40px}.sys{display:inline-flex;align-items:center;gap:6px;line-height:1.45}.sys .br{font-size:86px;font-weight:300;line-height:1;margin-top:-8px}.z7 p{margin:0 0 6px;font-size:28px}.z7 .gl{font-size:28px;margin:2px 0 2px 10px}.z7 .zh{font-size:29px;font-weight:800;margin:4px 0}.z4 p{font-size:27px;margin:0 0 6px}.z4 .two{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.z4 .gl{font-size:28px;margin:1px 0 1px 10px}.z4ans{visibility:hidden;color:var(--acc);font-weight:800}.done .z4ans{visibility:visible}.two{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:10px}
+.pcard{background:var(--paper);border:3px solid var(--rule);border-radius:16px;padding:10px 18px;font-size:30px;line-height:1.55}
+.pcard .ph2{font-size:36px;font-weight:800;margin-bottom:4px}
+.pcard.okc{border-color:var(--ok)}.pcard.badc{border-color:var(--bad)}
+.verd{font-weight:800;margin-top:4px}.verd.ok{color:var(--ok)}.verd.bad{color:var(--bad)}
+input.num.sm{width:96px;height:48px;font-size:28px;vertical-align:middle;margin:0 2px}
+.gaps{display:grid;grid-template-columns:1fr 1fr;gap:34px}.gaps p{margin:6px 0 12px}.gcol{min-width:0}
+.t3 .gl{margin:3px 0 3px 4px;font-size:28px}.t3 .ah{font-size:28px}.two{display:grid;grid-template-columns:1fr 1fr;gap:20px}.axg .gl{margin:2px 0 2px 18px;font-size:30px;white-space:nowrap}.axg .ah{font-size:30px;font-weight:700;margin:6px 0 0}.gl{font-size:31px;margin:8px 0 8px 18px;font-weight:600}
+/* тренажер */
+.tr-letters{display:flex;gap:14px;margin:6px 0 12px}
+.tr-let{font:inherit;font-size:34px;font-weight:800;width:84px;height:68px;border-radius:16px;border:4px solid currentColor;background:var(--paper);cursor:pointer;font-style:italic}
+.tr-let.sel{box-shadow:0 0 0 6px rgba(192,83,42,.35);transform:scale(1.06)}
+.tr-let.done{opacity:.45;cursor:default}
+.tr-eqs{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tr-eq{font:inherit;font-size:30px;font-weight:600;border:3px solid var(--rule);background:var(--paper);color:var(--ink);border-radius:14px;padding:10px 14px;cursor:pointer;text-align:left;display:flex;justify-content:space-between;align-items:center}
+.tr-eq .tag2{font-style:italic;font-weight:800;min-width:34px;text-align:right}
+.tr-eq.ok{border-color:var(--ok);background:#dff1e6}
+.tr-eq.bad{animation:shake .4s;border-color:var(--bad);background:#f8e1de}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.tr-msg{font-size:29px;font-weight:700;min-height:42px;margin:10px 0 4px}
+.tr-nav{display:flex;align-items:center;gap:10px;margin-top:6px}
+.tr-nav .btn{margin:0}
+svg .hit{stroke:transparent;stroke-width:28;cursor:pointer}
+svg .ln.big{stroke-width:7}
+/* нижня панель */
+#bar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--paper);border-top:2px solid var(--rule)}
+#bar button{font-family:inherit;font-weight:600;font-size:26px;border:0;border-radius:14px;padding:12px 22px;cursor:pointer;background:var(--ans);color:var(--ink)}
+#bar #next{background:var(--acc);color:#fff;min-width:260px}
+#bar #next.reveal{background:var(--acc2)}
+#bar .sp{flex:1}
+#count{font-size:24px;color:var(--muted);min-width:110px;text-align:center}
+#prog{position:absolute;left:0;bottom:0;height:5px;background:var(--acc);transition:width .2s}
+
+/* ===== телефонна версія ===== */
+html,body{height:auto;overflow:auto;background:var(--bg)}
+#stage{position:relative;width:820px;height:auto;min-height:100vh;transform:none!important;zoom:var(--z,1)}
+#nav{flex-wrap:nowrap;overflow-x:auto;gap:6px;padding:8px 10px;position:sticky;top:0;z-index:20;-webkit-overflow-scrolling:touch}
+#nav button{flex:none;min-width:150px;font-size:18px}
+#slides{overflow:visible;flex:none}
+.slide{position:relative;inset:auto;padding:16px 18px 130px;font-size:30px}
+.slide h2{font-size:38px;flex-wrap:wrap;gap:10px}
+.slide [style*="width:"]{width:auto!important;max-width:100%}
+.cols,.two,.gaps{display:block!important}
+.cols>*,.two>*,.gaps>*{margin-bottom:18px}
+.cols>div[style*="flex-direction:column"]{align-items:flex-start!important}
+.fig{text-align:center}
+.fig svg,.slide svg.big{max-width:100%;height:auto}
+.cards{display:grid!important;grid-template-columns:1fr 1fr;gap:14px}
+.toc{grid-template-columns:1fr}
+.slide table{width:100%;font-size:24px!important}
+.slide td,.slide th{padding:6px 8px}
+.keypad{position:fixed;left:0;bottom:84px;width:820px!important;z-index:25;background:var(--paper);border-top:2px solid var(--rule);padding:8px 12px;grid-template-columns:repeat(6,1fr)!important;margin:0!important}
+.slide:has(.keypad){padding-bottom:330px}
+#prog{display:none}
+table.der,table.der tbody,table.der tr,table.der td{display:block;width:100%}
+table.der tr:first-child{display:none}
+table.der td{white-space:normal!important;border:0;border-bottom:2px solid var(--rule)}
+table.der tr{border:2px solid var(--rule);margin-bottom:10px}
+.keypad button{height:64px;font-size:32px}
+#bar{position:fixed;left:0;right:0;bottom:0;width:820px;z-index:30}
+#bar #full{display:none}
+#bar #next{min-width:200px}
+.slide.title h1{font-size:64px}
+</style>
+</head>
+<body>
+<div id="stage">
+<div id="nav"></div>
+<div id="slides">
+
+<!-- ====================== ТИТУЛ ====================== -->
+<section class="slide title" data-sec="0">
+<h1>Рівняння прямої</h1>
+<p class="muted" style="font-size:36px;margin:0">Геометрія · 9 клас</p>
+<p style="font-size:28px;margin:6px 0 0">Автор проєкту: Сидорчук Н.В.</p>
+<div class="toc">
+<button data-go="1"><b>1</b>Загальне рівняння прямої</button>
+<button data-go="2"><b>2</b>Окремі випадки розташування</button>
+<button data-go="3"><b>3</b>Належність точок прямій</button>
+<button data-go="4"><b>4</b>Перетин прямої з осями</button>
+<button data-go="5"><b>5</b>Рівняння через кутовий коефіцієнт</button>
+<button data-go="6"><b>6</b>Умова паралельності</button>
+<button data-go="10"><b>7</b>Точка перетину прямих</button>
+<button data-go="7"><b>8</b>Рівняння прямої через дві точки</button>
+<button data-go="9"><b>🎯</b>Тренажер: підберіть рівняння</button>
+<button data-go="8"><b>✓</b>Підсумок</button>
+</div>
+</section>
+
+<!-- ====================== РОЗДІЛ 1 ====================== -->
+<section class="slide cover" data-sec="1"><div class="num">1</div><h1>Загальне рівняння прямої</h1><div class="what">Яке рівняння задає пряму</div></section>
+
+<section class="slide" data-sec="1">
+<h2>Загальне рівняння прямої</h2>
+<div class="box"><div class="big">ax + by + c = 0</div>
+<p style="text-align:center;margin:0">a, b, c — числа; <b>a і b не дорівнюють нулю одночасно</b></p></div>
+<p><b>Запишіть a, b і c</b> для кожного рівняння, потім натисніть «Перевірити»:</p>
+<div class="cols"><div><table id="abcTab">
+<tr><th>Рівняння</th><th>a</th><th>b</th><th>c</th></tr>
+</table>
+<div class="tr-nav" style="margin-top:14px"><button class="btn" data-check>Перевірити</button><button class="btn alt" id="abcNew">Нові рівняння</button><span class="tr-msg" data-msg style="margin:0 0 0 10px"></span></div>
+</div>
+<div class="keypad"></div></div>
+</section>
+
+
+
+<section class="slide" data-sec="1">
+<h2>Які рівняння задають пряму? <span class="tag chk">перевір себе</span></h2>
+<p style="margin:0 0 6px">Перетягніть кожне рівняння у свою групу (або натисніть на рівняння, потім на групу).</p>
+<div class="sorter" data-gen="lines">
+<div class="pool"><div class="card2" data-g="0">3x − 5 = 0</div><div class="card2" data-g="1">x² + y = 1</div><div class="card2" data-g="0">y = 7</div><div class="card2" data-g="1">xy = 1</div><div class="card2" data-g="1">0·x + 0·y + 2 = 0</div><div class="card2" data-g="0">2x + 3y = 0</div></div>
+<div class="bins" style="grid-template-columns:repeat(2,1fr)"><div class="bin" data-g="0"><div class="bh">Задає пряму</div></div><div class="bin" data-g="1"><div class="bh">Не задає пряму</div></div></div>
+<div class="tr-nav" style="margin-top:12px"><button class="btn" data-sort-check>Перевірити</button><button class="btn alt" data-sort-reset>Почати знову</button><span class="tr-msg" data-msg style="margin:0 0 0 10px"></span></div>
+</div>
+<div class="box soft step small" data-step="1">Пряму задає рівняння першого степеня ax + by + c = 0, де a і b не дорівнюють нулю одночасно. Рівняння з x², y² або xy — не першого степеня; у 0·x + 0·y + c = 0 жодна точка не підходить.</div>
+</section>
+
+<!-- ====================== РОЗДІЛ 2 ====================== -->
+<section class="slide cover" data-sec="2"><div class="num">2</div><h1>Окремі випадки розташування</h1><div class="what">Що буде, якщо a, b або c дорівнює нулю</div></section>
+
+<section class="slide" data-sec="2">
+<h2>Окремі випадки: ax + by + c = 0</h2>
+<div class="cols">
+<table class="der">
+<tr><th>Умова</th><th>Підставляємо і виводимо</th><th>Пряма</th></tr>
+<tr class="step" data-step="1"><td><b>a = 0</b></td><td><span class="ch"><span class="z">0·x</span> + by + c = 0</span><span class="arw">⇒</span><span class="ch">by + c = 0</span><span class="arw">⇒</span><span class="ch">by = −c</span><span class="arw">⇒</span><span class="res">y = −<span class="fr"><span>c</span><span>b</span></span></span><div class="eg">Наприклад: <span class="z">0·x</span> + 2y − 6 = 0<span class="arw sm">⇒</span>2y = 6<span class="arw sm">⇒</span><b class="exr">y = 3</b></div></td><td><span class="hl">∥ Ox</span></td></tr>
+<tr class="step" data-step="2"><td><b>b = 0</b></td><td><span class="ch">ax + <span class="z">0·y</span> + c = 0</span><span class="arw">⇒</span><span class="ch">ax + c = 0</span><span class="arw">⇒</span><span class="ch">ax = −c</span><span class="arw">⇒</span><span class="res">x = −<span class="fr"><span>c</span><span>a</span></span></span><div class="eg">Наприклад: x + <span class="z">0·y</span> + 2 = 0<span class="arw sm">⇒</span><b class="exr">x = −2</b></div></td><td><span class="hl2">∥ Oy</span></td></tr>
+<tr class="step" data-step="3"><td><b>c = 0</b></td><td><span class="ch">ax + by + <span class="z">0</span> = 0</span><span class="arw">⇒</span><span class="res">ax + by = 0</span><div>точка O(0; 0) підходить: a·0 + b·0 = 0</div><div class="eg">Наприклад: 2x − y + <span class="z">0</span> = 0<span class="arw sm">⇒</span><b class="exr">y = 2x</b></div></td><td><span style="color:var(--blue);font-weight:700">через O(0; 0)</span></td></tr>
+</table>
+<div class="fig" id="figSpec"></div>
+</div>
+<p class="step" data-step="4" style="margin-top:10px">a = 0 і c = 0: &nbsp;<span class="ch"><span class="z">0·x</span> + by + <span class="z">0</span> = 0</span><span class="arw">⇒</span><span class="res">y = 0</span> — це <b>вісь Ox</b>;<br>b = 0 і c = 0: &nbsp;<span class="ch">ax + <span class="z">0·y</span> + <span class="z">0</span> = 0</span><span class="arw">⇒</span><span class="res">x = 0</span> — це <b>вісь Oy</b>.</p>
+</section>
+
+<section class="slide" data-sec="2">
+<h2>Як розташована пряма? Розподіліть на групи <span class="tag chk">перевір себе</span></h2>
+<div class="sorter" data-gen="spec">
+<div class="pool"><div class="card2" data-g="0">y = 3</div><div class="card2" data-g="1">x = −2</div><div class="card2" data-g="2">2x − y = 0</div><div class="card2" data-g="1">5x + 2 = 0</div><div class="card2" data-g="0">4y − 1 = 0</div><div class="card2" data-g="2">x + 3y = 0</div></div>
+<div class="bins" style="grid-template-columns:repeat(3,1fr)"><div class="bin" data-g="0"><div class="bh">Паралельна осі Ox</div></div><div class="bin" data-g="1"><div class="bh">Паралельна осі Oy</div></div><div class="bin" data-g="2"><div class="bh">Проходить через O</div></div></div>
+<div class="tr-nav" style="margin-top:12px"><button class="btn" data-sort-check>Перевірити</button><button class="btn alt" data-sort-reset>Почати знову</button><span class="tr-msg" data-msg style="margin:0 0 0 10px"></span></div>
+</div>
+</section>
+
+<section class="slide" data-sec="2">
+<h2>Задача 1 <span class="tag do">розв'яжи</span></h2>
+<div class="cols">
+<div style="width:820px">
+<p style="margin:0 0 8px">Проведіть пряму через точку <b>M<span id="drM"></span></b>:</p>
+<div class="tr-nav" style="margin:0 0 10px"><button class="btn" id="drA">а) паралельно осі Ox</button><button class="btn alt" id="drB">б) паралельно осі Oy</button></div>
+<p class="small muted" style="margin:4px 0">Проведіть пальцем від одного вузла сітки до іншого (або натисніть два вузли).</p>
+<div class="tr-nav"><button class="btn" id="drCheck">Перевірити пряму</button><button class="btn alt" id="drClear">Стерти</button><button class="btn alt" id="drNew">Нова точка</button></div>
+<div class="tr-msg" id="drMsg"></div>
+<div id="drEqRow" style="visibility:hidden;font-size:34px;font-weight:700;display:flex;align-items:center;gap:12px">Рівняння: <span id="drVar">y</span> = <input inputmode="none" class="num" id="drEq" autocomplete="off"><button class="btn" id="drEqCheck">Перевірити</button></div>
+<p class="small" style="margin-top:6px">Рівняння осей: Ox — <span class="ans"><span>y = 0</span></span>, &nbsp;Oy — <span class="ans"><span>x = 0</span></span></p>
+<div class="box soft small step" data-step="1">∥ Ox: усі точки мають однакову ординату ⇒ y = y₀. &nbsp;∥ Oy: однакову абсцису ⇒ x = x₀.</div>
+</div>
+<div class="fig" id="figDraw"></div>
+</div>
+</section>
+
+<!-- ====================== РОЗДІЛ 3 ====================== -->
+<section class="slide cover" data-sec="3"><div class="num">3</div><h1>Належність точок прямій</h1><div class="what">Як перевірити, чи лежить точка на прямій</div></section>
+
+<section class="slide" data-sec="3">
+<h2>Чи лежить точка на прямій?</h2>
+<div class="cols">
+<div>
+<div class="box">Точка M(<span class="cx">x₀</span>; <span class="cy">y₀</span>) лежить на прямій ax + by + c = 0 ⇔ <b>a·<span class="cx">x₀</span> + b·<span class="cy">y₀</span> + c = 0</b></div>
+<p>Пряма: &nbsp;<b>2·<span class="cx">x</span> + <span class="cy">y</span> − 4 = 0</b>. &nbsp;<span class="muted small">Підставляємо <span class="cx">x</span> і <span class="cy">y</span> точки.</span></p>
+<div class="two">
+<div class="pcard okc step" data-step="1">
+<div class="ph2">K(<span class="cx">1</span>; <span class="cy">2</span>)</div>
+<div><span class="cx">x</span> = <span class="cx">1</span>, &nbsp;<span class="cy">y</span> = <span class="cy">2</span></div>
+<div>2·<span class="cx">1</span> + <span class="cy">2</span> − 4 = <b>0</b></div>
+<div class="verd ok">0 = 0 ✓ лежить</div>
+</div>
+<div class="pcard badc step" data-step="2">
+<div class="ph2">R(<span class="cx">−1</span>; <span class="cy">5</span>)</div>
+<div><span class="cx">x</span> = <span class="cx">−1</span>, &nbsp;<span class="cy">y</span> = <span class="cy">5</span></div>
+<div>2·(<span class="cx">−1</span>) + <span class="cy">5</span> − 4 = <b>−1</b></div>
+<div class="verd bad">−1 ≠ 0 ✗ не лежить</div>
+</div>
+</div>
+</div>
+<div class="fig" id="figBel"></div>
+</div>
+</section>
+
+<section class="slide" data-sec="3">
+<h2>Чи лежить точка на прямій <span data-line>3x − y − 2 = 0</span>? <span class="tag chk">перевір себе</span></h2>
+<div class="sorter" data-gen="points">
+<div class="pool"><div class="card2" data-g="0">(1; 1)</div><div class="card2" data-g="1">(2; 5)</div><div class="card2" data-g="0">(0; −2)</div><div class="card2" data-g="0">(−1; −5)</div><div class="card2" data-g="1">(3; 6)</div><div class="card2" data-g="1">(−2; 0)</div></div>
+<div class="bins" style="grid-template-columns:repeat(2,1fr)"><div class="bin" data-g="0"><div class="bh">Лежить на прямій</div></div><div class="bin" data-g="1"><div class="bh">Не лежить на прямій</div></div></div>
+<div class="tr-nav" style="margin-top:12px"><button class="btn" data-sort-check>Перевірити</button><button class="btn alt" data-sort-reset>Почати знову</button><span class="tr-msg" data-msg style="margin:0 0 0 10px"></span></div>
+</div>
+<div class="box soft small step" data-step="1">Підставте координати точки в рівняння: якщо ліва частина дорівнює 0, точка лежить на прямій.</div>
+</section>
+
+<section class="slide" data-sec="3">
+<h2>Задача 2 <span class="tag do">розв'яжи</span></h2>
+<div class="cols">
+<div id="gapBox" class="gaps" style="width:1080px"></div>
+<div class="keypad"></div>
+</div>
+<div class="tr-nav" style="margin-top:12px"><button class="btn" data-check>Перевірити</button><button class="btn alt" id="gapNew">Нові числа</button><span class="tr-msg" data-msg style="margin:0 0 0 10px"></span></div>
+</section>
+
+<!-- ====================== РОЗДІЛ 4 ====================== -->
+<section class="slide cover" data-sec="4"><div class="num">4</div><h1>Перетин прямої з осями</h1><div class="what">Де пряма перетинає осі координат і як її побудувати</div></section>
+
+<section class="slide" data-sec="4">
+<h2>Задача 3 <span class="tag do">розв'яжи і побудуй</span></h2>
+<div class="cols" style="align-items:flex-start;gap:28px">
+<div style="width:900px" class="t3 axg ansblk">
+<p style="margin:0 0 4px">Знайдіть точки перетину прямої <b id="t3Eq" style="white-space:nowrap"></b> з осями координат і побудуйте її.</p>
+<div id="t3Box"></div>
+<div class="ah">3) Поставте A і B на малюнку й проведіть пряму.</div>
+<div class="gl z4ans" id="t3Ans"></div>
+<div class="tr-nav" style="margin-top:8px"><button class="btn" data-check>Перевірити</button><button class="btn alt" id="t3Clear">Стерти малюнок</button><button class="btn alt" id="t3New">Нова пряма</button></div>
+<div class="tr-msg" data-msg style="margin:6px 0 0"></div>
+</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:12px"><div class="fig" id="figT3"></div>
+<div class="keypad" style="grid-template-columns:repeat(6,76px)"></div></div>
+</div>
+</section>
+
+<section class="slide" data-sec="4">
+<h2>Задача 3 (продовження) <span class="tag do">★ площа</span></h2>
+<div class="cols" style="align-items:flex-start;gap:28px">
+<div style="width:880px" class="t3 axg ansblk">
+<p style="margin:0 0 8px">Знайдіть площу трикутника, який пряма <b id="t3aEq" style="white-space:nowrap"></b> утворює з осями координат.</p>
+<div id="t3aBox"></div>
+<div class="tr-nav" style="margin-top:18px"><button class="btn" data-check>Перевірити</button><span class="tr-msg" data-msg style="margin:0 0 0 10px"></span></div>
+</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:12px"><div class="fig" id="t3aFig"></div>
+<div class="keypad" style="grid-template-columns:repeat(6,76px)"></div></div>
+</div>
+</section>
+
+<!-- ====================== РОЗДІЛ 5 ====================== -->
+<section class="slide cover" data-sec="5"><div class="num">5</div><h1>Рівняння через кутовий коефіцієнт</h1><div class="what">y = kx + <i class="v">l</i>: що показують k і <i class="v">l</i> і як від них залежить розташування прямої</div></section>
+
+<section class="slide" data-sec="5">
+<h2>Рівняння прямої з кутовим коефіцієнтом</h2>
+<div class="cols">
+<div>
+<p>Якщо b ≠ 0, з ax + by + c = 0 виражаємо y:</p>
+<div class="box"><div class="big" style="font-size:54px">y = kx + <i class="v">l</i></div></div>
+<div class="box soft step" data-step="1" style="font-size:28px;padding:10px 16px;line-height:1.9">
+<b>Приклад.</b> <span class="ch">3x <span class="cy">− 4y</span> + 12 = 0</span><br>
+<span class="arw">①</span>залишаємо y зліва: <span class="ch"><span class="cy">−4y</span> = <span class="cx">−3x − 12</span></span><br>
+<span class="arw">②</span>ділимо на <span class="cy">−4</span>: <span class="ch">y = <span class="fr"><span class="cx">−3x − 12</span><span class="cy">−4</span></span></span><span class="arw">⇒</span><span class="res">y = <span class="fr"><span>3</span><span>4</span></span>x + 3</span><br>
+<span class="arw">③</span><b>k</b> = <span class="fr"><span>3</span><span>4</span></span>, &nbsp;<i class="v">l</i> = 3
+</div>
+<p class="step" data-step="2"><b>k</b> — <b>кутовий коефіцієнт</b>: <span class="hl">k = tg α</span> (α — кут з додатним напрямом Ox). &nbsp;<b><i class="v">l</i></b> — точка перетину з Oy: (0; <i class="v">l</i>).</p>
+<p class="step" data-step="3">У △AOB &nbsp;tg α = <span class="fr"><span>OB</span><span>OA</span></span> = <span class="fr"><span>3</span><span>4</span></span> = k</p>
+</div>
+<div class="fig" id="figTg"></div>
+</div>
+</section>
+
+<section class="slide" data-sec="5">
+<h2>Як k і <i class="v">l</i> змінюють пряму? <span class="tag">дослідження</span></h2>
+<div class="cols">
+<div>
+<div class="ctl">
+<label>k <input type="range" id="kS" min="-3" max="3" step="0.25" value="1"><output id="kO">1</output></label>
+<label><i class="v">l</i> <input type="range" id="bS" min="-4" max="4" step="1" value="1"><output id="bO">1</output></label>
+</div>
+<div class="readout" id="kbEq">y = x + 1</div>
+<div id="kbTxt" style="font-size:29px"></div>
+<div style="margin-top:10px"><button class="btn alt" data-k="1">α = 45°</button><button class="btn alt" data-k="-1">α = 135°</button><button class="btn alt" data-k="0">k = 0</button></div>
+</div>
+<div class="fig" id="figKB"></div>
+</div>
+</section>
+
+<section class="slide" data-sec="5">
+<h2>Розташування: знак k</h2>
+<p style="margin:0">Число <b>k</b> показує, куди «йде» пряма, якщо дивитися зліва направо.</p>
+<div class="cards">
+<div class="card step" data-step="1"><div class="fig" id="mkK1"></div><div class="cap"><div class="eqn">y = 2x + 1</div><div class="sign">k &gt; 0</div>кут α гострий,<br>пряма «піднімається» ↗</div></div>
+<div class="card step" data-step="2"><div class="fig" id="mkK2"></div><div class="cap"><div class="eqn">y = −x + 2</div><div class="sign">k &lt; 0</div>кут α тупий,<br>пряма «спускається» ↘</div></div>
+<div class="card step" data-step="3"><div class="fig" id="mkK3"></div><div class="cap"><div class="eqn">y = 2</div><div class="sign">k = 0</div>пряма паралельна осі Ox</div></div>
+</div>
+</section>
+<section class="slide" data-sec="5">
+<h2>Розташування: знак <i class="v">l</i></h2>
+<p style="margin:0">Число <b><i class="v">l</i></b> показує, де пряма перетинає вісь Oy: у точці (0; <i class="v">l</i>).</p>
+<div class="cards">
+<div class="card step" data-step="1"><div class="fig" id="mkL1"></div><div class="cap"><div class="eqn">y = x + 2</div><div class="sign"><i class="v">l</i> &gt; 0</div>перетинає Oy<br><b>вище</b> точки O</div></div>
+<div class="card step" data-step="2"><div class="fig" id="mkL2"></div><div class="cap"><div class="eqn">y = x − 2</div><div class="sign"><i class="v">l</i> &lt; 0</div>перетинає Oy<br><b>нижче</b> точки O</div></div>
+<div class="card step" data-step="3"><div class="fig" id="mkL3"></div><div class="cap"><div class="eqn">y = x</div><div class="sign"><i class="v">l</i> = 0</div>проходить<br><b>через O(0; 0)</b></div></div>
+</div>
+</section>
+<section class="slide" data-sec="5">
+<h2>Порівняйте k і <i class="v">l</i> з нулем за рисунком <span class="tag do">постав знак</span></h2>
+<div class="cards">
+<div class="card"><div class="fig sgf" id="sgQ1"></div><div class="cap"><div class="eqn">а)</div>
+<div class="sgrow">k <span class="sgp" data-v="k1"><select><option value="">?</option><option value="&gt;">&gt;</option><option value="&lt;">&lt;</option><option value="=">=</option></select></span> 0</div>
+<div class="sgrow"><i class="v">l</i> <span class="sgp" data-v="l1"><select><option value="">?</option><option value="&gt;">&gt;</option><option value="&lt;">&lt;</option><option value="=">=</option></select></span> 0</div></div></div>
+<div class="card"><div class="fig sgf" id="sgQ2"></div><div class="cap"><div class="eqn">б)</div>
+<div class="sgrow">k <span class="sgp" data-v="k2"><select><option value="">?</option><option value="&gt;">&gt;</option><option value="&lt;">&lt;</option><option value="=">=</option></select></span> 0</div>
+<div class="sgrow"><i class="v">l</i> <span class="sgp" data-v="l2"><select><option value="">?</option><option value="&gt;">&gt;</option><option value="&lt;">&lt;</option><option value="=">=</option></select></span> 0</div></div></div>
+<div class="card"><div class="fig sgf" id="sgQ3"></div><div class="cap"><div class="eqn">в)</div>
+<div class="sgrow">k <span class="sgp" data-v="k3"><select><option value="">?</option><option value="&gt;">&gt;</option><option value="&lt;">&lt;</option><option value="=">=</option></select></span> 0</div>
+<div class="sgrow"><i class="v">l</i> <span class="sgp" data-v="l3"><select><option value="">?</option><option value="&gt;">&gt;</option><option value="&lt;">&lt;</option><option value="=">=</option></select></span> 0</div></div></div>
+<div class="card"><div class="fig sgf" id="sgQ4"></div><div class="cap"><div class="eqn">г)</div>
+<div class="sgrow">k <span class="sgp" data-v="k4"><select><option value="">?</option><option value="&gt;">&gt;</option><option value="&lt;">&lt;</option><option value="=">=</option></select></span> 0</div>
+<div class="sgrow"><i class="v">l</i> <span class="sgp" data-v="l4"><select><option value="">?</option><option value="&gt;">&gt;</option><option value="&lt;">&lt;</option><option value="=">=</option></select></span> 0</div></div></div>
+</div>
+<div class="tr-nav" style="margin-top:14px"><button class="btn" id="sgCheck">Перевірити</button><button class="btn alt" id="sgNew">Нові графіки</button><span class="tr-msg" id="sgMsg" style="margin:0 0 0 10px"></span></div>
+<p class="step small muted" data-step="1" style="margin-top:8px">Підказка: пряма «піднімається» ↗ — k &gt; 0, «спускається» ↘ — k &lt; 0, горизонтальна — k = 0. Перетинає Oy вище O — <i class="v">l</i> &gt; 0, нижче — <i class="v">l</i> &lt; 0, через O — <i class="v">l</i> = 0.</p>
+</section>
+
+<section class="slide" data-sec="5">
+<h2>Знайдіть k і кут α <span class="tag chk">перевір себе</span></h2>
+<table style="width:100%">
+<tr><th>Пряма</th><th>k</th><th>α</th><th>Розташування</th></tr>
+<tr><td>y = x + 2</td><td><span class="ans"><span>1</span></span></td><td><span class="ans"><span>45°</span></span></td><td><span class="ans"><span><span class="sch" data-k="1" data-l="2"></span>↗, Oy вище O</span></span></td></tr>
+<tr><td>y = −<span class="rt">√<span>3</span></span>x</td><td><span class="ans"><span>−<span class="rt">√<span>3</span></span></span></span></td><td><span class="ans"><span>120°</span></span></td><td><span class="ans"><span><span class="sch" data-k="-1.732" data-l="0"></span>↘, через O</span></span></td></tr>
+<tr><td>y = 4</td><td><span class="ans"><span>0</span></span></td><td><span class="ans"><span>0°</span></span></td><td><span class="ans"><span><span class="sch" data-k="0" data-l="2.5"></span>∥ Ox, вище O</span></span></td></tr>
+<tr><td>2x + 2y − 1 = 0</td><td><span class="ans"><span>−1</span></span></td><td><span class="ans"><span>135°</span></span></td><td><span class="ans"><span><span class="sch" data-k="-1" data-l="0.5"></span>↘, Oy вище O</span></span></td></tr>
+</table>
+<p class="muted small step" data-step="1">Останню пряму спочатку записуємо як y = −x + <span class="fr"><span>1</span><span>2</span></span>.</p>
+</section>
+
+<section class="slide" data-sec="5">
+<h2>Задача 4 <span class="tag do">розв'яжи</span></h2>
+<div class="cols" style="align-items:flex-start;gap:28px">
+<div id="z4Box" class="axg z4" style="width:1100px"></div>
+<div style="display:flex;flex-direction:column;gap:12px;align-items:stretch"><div class="keypad"></div>
+<button class="btn" data-check>Перевірити</button><button class="btn alt" id="z4New">Нові числа</button><div class="tr-msg" data-msg style="margin:0;font-size:26px"></div></div>
+</div>
+</section>
+
+<!-- ====================== РОЗДІЛ 6 ====================== -->
+<section class="slide cover" data-sec="6"><div class="num">6</div><h1>Умова паралельності</h1><div class="what">Коли прямі y = k₁x + <i class="v">l</i>₁ і y = k₂x + <i class="v">l</i>₂ паралельні</div></section>
+
+<section class="slide" data-sec="6">
+<h2>Умова паралельності прямих</h2>
+<div class="cols">
+<div>
+<div class="box">y = k₁x + <i class="v">l</i>₁ ∥ y = k₂x + <i class="v">l</i>₂ ⇔ <span class="hl">k₁ = k₂</span> і <i class="v">l</i>₁ ≠ <i class="v">l</i>₂</div>
+<p class="small muted">Рівні k — рівні кути з віссю Ox (відповідні кути).<br>Якщо k₁ = k₂ і <i class="v">l</i>₁ = <i class="v">l</i>₂ — прямі збігаються.</p>
+<div class="ctl">
+<label><span style="color:var(--acc)">k₁</span> <input type="range" id="k1S" min="-2" max="2" step="0.25" value="0.5"><output id="k1O">0,5</output></label>
+<label><span style="color:var(--acc2)">k₂</span> <input type="range" id="k2S" min="-2" max="2" step="0.25" value="-0.5"><output id="k2O">−0,5</output></label>
+</div>
+<div class="readout" id="parTxt"></div>
+</div>
+<div class="fig" id="figPar"></div>
+</div>
+</section>
+
+<section class="slide" data-sec="6">
+<h2>Приклад</h2>
+<div class="cols" style="align-items:flex-start">
+<div style="width:960px">
+<p>Складіть рівняння прямої, яка проходить через точку <b>M(1; −2)</b> паралельно прямій <b>y = −3x + 5</b>.</p>
+<ol class="st">
+<li class="step" data-step="1">Паралельні прямі мають рівні кутові коефіцієнти: k = −3, тобто y = −3x + <i class="v">l</i>.</li>
+<li class="step" data-step="2">Точка M лежить на прямій: −2 = −3·1 + <i class="v">l</i>, звідки <i class="v">l</i> = 1.</li>
+<li class="step" data-step="3"><b>Відповідь:</b> <span class="hl">y = −3x + 1</span></li>
+</ol>
+<div class="box soft small step" data-step="4">Якщо пряма задана загальним рівнянням, спочатку виразіть y, щоб побачити k.</div>
+</div>
+<div class="fig" id="figParEx"></div>
+</div>
+</section>
+
+<section class="slide" data-sec="6">
+<h2>Які прямі паралельні між собою? <span class="tag chk">перевір себе</span></h2>
+<div class="grid-opts" style="grid-template-columns:repeat(2,1fr)">
+<button class="opt" data-ok="1">а) y = 2x + 1</button>
+<button class="opt" data-ok="1">б) 2x − y + 5 = 0</button>
+<button class="opt" data-ok="0">в) y = −2x + 1</button>
+<button class="opt" data-ok="1">г) 4x − 2y = 0</button>
+</div>
+<div class="box soft small step" data-step="1">б) y = 2x + 5; &nbsp;г) y = 2x. У прямих а), б), г) k = 2 і різні <i class="v">l</i> — вони попарно паралельні. Пряма в) має k = −2.</div>
+</section>
+
+<section class="slide" data-sec="6">
+<h2>Задача 5 <span class="tag do">розв'яжи</span></h2>
+<div class="two z5">
+<div>
+<p>а) При якому значенні a прямі <b style="white-space:nowrap">y = (a + 1)x − 2</b> і <b style="white-space:nowrap">y = 3x + 5</b> паралельні?</p>
+<div class="gl step" data-step="1">Прямі паралельні, якщо <span class="cx">k₁ = k₂</span> і <span class="cy"><i class="v">l</i>₁ ≠ <i class="v">l</i>₂</span>.</div>
+<div class="gl step" data-step="2"><span class="cx">k₁ = a + 1</span>, &nbsp;<span class="cx">k₂ = 3</span></div>
+<div class="gl step" data-step="3">a + 1 = 3</div>
+<div class="gl step" data-step="3">a = 3 − 1</div>
+<div class="gl step" data-step="3">a = 2</div>
+<div class="gl step" data-step="4">Перевірка: <span class="cy"><i class="v">l</i>₁ = −2</span>, <span class="cy"><i class="v">l</i>₂ = 5</span>, −2 ≠ 5 ✓</div>
+<div class="gl step" data-step="4"><span class="hl">Відповідь: a = 2</span></div>
+</div>
+<div>
+<p>б) Складіть рівняння прямої, що проходить через точку <b style="white-space:nowrap">N(4; 3)</b> паралельно прямій <b style="white-space:nowrap">x + 2y − 4 = 0</b>.</p>
+<div class="gl step" data-step="5"><b>1)</b> Знайдемо k даної прямої, виразимо y:</div>
+<div class="gl step" data-step="5">2y = −x + 4</div>
+<div class="gl step" data-step="5">y = −<span class="fr"><span>1</span><span>2</span></span>x + 2, &nbsp;тому <span class="cx">k = −<span class="fr"><span>1</span><span>2</span></span></span></div>
+<div class="gl step" data-step="6"><b>2)</b> Паралельна пряма має той самий k:</div>
+<div class="gl step" data-step="6">y = <span class="cx">−<span class="fr"><span>1</span><span>2</span></span></span>x + <i class="v">l</i></div>
+<div class="gl step" data-step="7"><b>3)</b> Підставимо N(4; 3): x = 4, y = 3</div>
+<div class="gl step" data-step="7">3 = −<span class="fr"><span>1</span><span>2</span></span>·4 + <i class="v">l</i></div>
+<div class="gl step" data-step="7">3 = −2 + <i class="v">l</i></div>
+<div class="gl step" data-step="7"><i class="v">l</i> = 5</div>
+<div class="gl step" data-step="8"><span class="hl">Відповідь: y = −<span class="fr"><span>1</span><span>2</span></span>x + 5</span></div>
+</div>
+</div>
+</section>
+
+<!-- ====================== РОЗДІЛ: ТОЧКА ПЕРЕТИНУ ====================== -->
+<section class="slide cover" data-sec="10"><div class="num">7</div><h1>Точка перетину прямих</h1><div class="what">Як знайти координати точки перетину двох прямих</div></section>
+
+<section class="slide" data-sec="10">
+<h2>Приклад</h2>
+<div class="cols" style="align-items:flex-start;gap:24px">
+<div style="width:900px" class="z7">
+<p>Знайдіть координати точки перетину прямих <b style="color:var(--acc);white-space:nowrap">y = 2x − 1</b> і <b style="color:var(--acc2);white-space:nowrap">y = −x + 5</b>.</p>
+<div class="gl step" data-step="1">Точка перетину лежить на обох прямих, тому її координати задовольняють систему:</div>
+<div class="gl step" data-step="1"><span class="sys"><span class="br">{</span><span><span style="color:var(--acc)">y = 2x − 1</span><br><span style="color:var(--acc2)">y = −x + 5</span></span></span></div>
+<div class="gl step" data-step="2">Праві частини рівні: &nbsp;2x − 1 = −x + 5</div>
+<div class="gl step" data-step="3">2x + x = 5 + 1</div>
+<div class="gl step" data-step="3">3x = 6</div>
+<div class="gl step" data-step="3">x = 2</div>
+<div class="gl step" data-step="4">y = 2·2 − 1</div>
+<div class="gl step" data-step="4">y = 3</div>
+<div class="gl step" data-step="5"><span class="hl">Відповідь: (2; 3)</span></div>
+</div>
+<div class="fig" id="figAB2"></div>
+</div>
+</section>
+
+<!-- ====================== РОЗДІЛ 7 ====================== -->
+<section class="slide cover" data-sec="7"><div class="num">8</div><h1>Рівняння прямої через дві точки</h1><div class="what">Формула, особливі випадки, задачі</div></section>
+
+<section class="slide" data-sec="7">
+<h2>Рівняння прямої через дві точки</h2>
+<div class="cols">
+<div>
+<div class="box"><div class="big" style="font-size:46px"><span class="fr"><span>x − x₁</span><span>x₂ − x₁</span></span> = <span class="fr"><span>y − y₁</span><span>y₂ − y₁</span></span></div>
+<p style="text-align:center;margin:0" class="small">пряма через точки A(x₁; y₁) і B(x₂; y₂), &nbsp;x₁ ≠ x₂, y₁ ≠ y₂</p></div>
+<p>Приклад: <b>A(−2; 1)</b>, <b>B(2; 3)</b>.</p>
+<p class="step" data-step="1"><span class="fr"><span>x − (−2)</span><span>2 − (−2)</span></span> = <span class="fr"><span>y − 1</span><span>3 − 1</span></span>, &nbsp;тобто &nbsp;<span class="fr"><span>x + 2</span><span>4</span></span> = <span class="fr"><span>y − 1</span><span>2</span></span></p>
+<p class="step" data-step="2">2(x + 2) = 4(y − 1), &nbsp;2x + 4 = 4y − 4</p>
+<p class="step" data-step="3"><span class="hl">x − 2y + 4 = 0</span>, &nbsp;або &nbsp;y = <span class="fr"><span>1</span><span>2</span></span>x + 2</p>
+<p class="step small muted" data-step="4">Перевірка точкою B: 2 − 2·3 + 4 = 0 ✓</p>
+<p class="step small muted" data-step="5">Інший спосіб: k = <span class="fr"><span>y₂ − y₁</span><span>x₂ − x₁</span></span> = <span class="fr"><span>1</span><span>2</span></span>, потім знаходимо <i class="v">l</i>.</p>
+</div>
+<div class="fig" id="figTwo"></div>
+</div>
+</section>
+
+<section class="slide" data-sec="7">
+<h2>Особливі випадки</h2>
+<div class="box">Якщо <b>x₁ = x₂</b>, пряма вертикальна: <b>x = x₁</b> (кутового коефіцієнта немає).<br>Якщо <b>y₁ = y₂</b>, пряма горизонтальна: <b>y = y₁</b>.</div>
+<p>Складіть рівняння прямої, що проходить через точки:</p>
+<p>а) A(3; −1) і B(3; 4): &nbsp;<span class="ans"><span>x = 3</span></span></p>
+<p>б) C(−2; 5) і D(4; 5): &nbsp;<span class="ans"><span>y = 5</span></span></p>
+<p>в) O(0; 0) і E(2; −6): &nbsp;<span class="ans"><span>y = −3x</span></span></p>
+</section>
+
+<section class="slide" data-sec="7">
+<h2>Задача 6 <span class="tag do">розв'яжи</span></h2>
+<p>Складіть рівняння прямої, що проходить через точки <b>C(1; 4)</b> і <b>D(3; −2)</b>. Чи проходить ця пряма через точку <b>E(−1; 10)</b>?</p>
+<ol class="st">
+<li class="step" data-step="1"><span class="fr"><span>x − 1</span><span>3 − 1</span></span> = <span class="fr"><span>y − 4</span><span>−2 − 4</span></span>, &nbsp;тобто &nbsp;<span class="fr"><span>x − 1</span><span>2</span></span> = <span class="fr"><span>y − 4</span><span>−6</span></span></li>
+<li class="step" data-step="2">−6(x − 1) = 2(y − 4), &nbsp;−6x + 6 = 2y − 8, &nbsp;<span class="hl">3x + y − 7 = 0</span> &nbsp;(y = −3x + 7)</li>
+<li class="step" data-step="3">E(−1; 10): 3·(−1) + 10 − 7 = 0 ✓ &nbsp;<span class="hl">так, проходить</span> (точки C, D, E лежать на одній прямій)</li>
+</ol>
+<p class="step" data-step="4"><b>Відповідь:</b> 3x + y − 7 = 0 (або y = −3x + 7); пряма проходить через точку E.</p>
+</section>
+
+<section class="slide" data-sec="7">
+<h2>Задача 7 <span class="tag do">розв'яжи</span></h2>
+<div class="cols" style="align-items:flex-start;gap:24px">
+<div style="width:930px" class="z7">
+<p>За рисунком складіть рівняння прямих <b style="color:var(--acc)">a</b> і <b style="color:var(--acc2)">b</b> у вигляді y = kx + <i class="v">l</i>. </p>
+<div class="two">
+<div>
+<div class="zh" style="color:var(--acc)">Пряма a</div>
+<div class="gl step" data-step="1">Перетинає Oy у точці <b>(0; −1)</b>,<br>тому <i class="v">l</i> = <span class="res">−1</span></div>
+<div class="gl step" data-step="2">Проходить через <b>(1; 1)</b>:</div>
+<div class="gl step" data-step="2">1 = k·1 − 1</div>
+<div class="gl step" data-step="2">k = <span class="res">2</span></div>
+<div class="gl step" data-step="3"><span class="hl">y = 2x − 1</span></div>
+</div>
+<div>
+<div class="zh" style="color:var(--acc2)">Пряма b</div>
+<div class="gl step" data-step="4">Перетинає Oy у точці <b>(0; 5)</b>,<br>тому <i class="v">l</i> = <span class="res">5</span></div>
+<div class="gl step" data-step="5">Проходить через <b>(5; 0)</b>:</div>
+<div class="gl step" data-step="5">0 = k·5 + 5</div>
+<div class="gl step" data-step="5">5k = −5</div>
+<div class="gl step" data-step="5">k = <span class="res">−1</span></div>
+<div class="gl step" data-step="6"><span class="hl">y = −x + 5</span></div>
+</div>
+</div>
+<div class="gl step" data-step="7" style="margin-top:14px;font-size:30px"><b>Відповідь:</b> &nbsp;<span style="color:var(--acc)">a: y = 2x − 1</span>; &nbsp;<span style="color:var(--acc2)">b: y = −x + 5</span></div>
+</div>
+<div class="fig" id="figAB"></div>
+</div>
+</section>
+
+
+<section class="slide" data-sec="7">
+<h2>Задача 8 <span class="tag do">розв'яжи і побудуй</span></h2>
+<div class="cols" style="align-items:flex-start;gap:24px">
+<div style="width:880px" class="z8">
+<p>A(−3; 0), B(1; 4), C(5; 2) — вершини трикутника. Складіть рівняння прямої, що містить медіану <b>BM</b>, і прямої, що проходить через B <b>паралельно AC</b>.</p>
+<div class="gl step" data-step="1"><b>1.</b> Позначте на рисунку точки A, B, C.</div>
+<div class="gl step" data-step="2"><b>2.</b> M — середина AC: x<sub>M</sub> = <span class="fr"><span>−3 + 5</span><span>2</span></span> = 1, &nbsp;y<sub>M</sub> = <span class="fr"><span>0 + 2</span><span>2</span></span> = 1. &nbsp;Позначте <b style="white-space:nowrap">M(1; 1)</b>.</div>
+<div class="gl step" data-step="3"><b>3.</b> У B і M однакова абсциса 1, тому <span class="hl">BM: x = 1</span>. Проведіть BM.</div>
+<div class="gl step" data-step="4"><b>4.</b> k<sub>AC</sub> = <span class="fr"><span>y<sub>C</sub> − y<sub>A</sub></span><span>x<sub>C</sub> − x<sub>A</sub></span></span> = <span class="fr"><span>2 − 0</span><span>5 − (−3)</span></span> = <span class="fr"><span>2</span><span>8</span></span> = <span class="fr"><span>1</span><span>4</span></span></div>
+<div class="gl step" data-step="5"><b>5.</b> Паралельна пряма має той самий k: y = <span class="fr"><span>1</span><span>4</span></span>x + <i class="v">l</i></div>
+<div class="gl step" data-step="5" style="padding-left:34px">B(1; 4): 4 = <span class="fr"><span>1</span><span>4</span></span>·1 + <i class="v">l</i>, &nbsp;<i class="v">l</i> = <span class="fr"><span>15</span><span>4</span></span>, &nbsp;<span class="hl">y = <span class="fr"><span>1</span><span>4</span></span>x + <span class="fr"><span>15</span><span>4</span></span></span></div>
+<div class="gl step" data-step="6"><b>6.</b> Проведіть цю пряму через B: на 4 клітинки вправо і на 1 вгору.</div>
+<div class="gl step" data-step="7"><b>Відповідь:</b> BM: x = 1; &nbsp;y = <span class="fr"><span>1</span><span>4</span></span>x + <span class="fr"><span>15</span><span>4</span></span></div>
+<div class="tr-nav" style="margin-top:10px"><button class="btn" id="t8Check">Перевірити рисунок</button><button class="btn alt" id="t8Undo">Скасувати</button><button class="btn alt" id="t8Clear">Стерти все</button></div>
+</div>
+<div><div class="fig" id="figT8"></div><p class="small muted" style="margin:6px 0 0;font-size:22px">Торкніться вузла — точка; протягніть від точки до точки — пряма.</p><div class="tr-msg" id="t8Msg" style="font-size:25px;margin-top:4px"></div></div>
+</div>
+</section>
+
+<!-- ====================== ТРЕНАЖЕР ====================== -->
+<section class="slide" data-sec="9">
+<h2>Тренажер: підберіть рівняння <span class="tag chk">гра</span></h2>
+<div class="cols">
+<div style="width:880px">
+<p style="margin:0 0 4px" class="small">Натисніть на букву прямої (або на саму пряму), потім — на її рівняння.</p>
+<div class="tr-letters" id="trLet"></div>
+<div class="tr-eqs" id="trEqs"></div>
+<div class="tr-msg" id="trMsg"></div>
+<div class="tr-nav"><button class="btn alt" id="trPrev">◀</button><span id="trNum" style="font-size:28px;font-weight:700;min-width:190px;text-align:center"></span><button class="btn alt" id="trNext">▶</button><span style="flex:1"></span><button class="btn alt" id="trShow">Показати відповіді</button><button class="btn alt" id="trReset">↺</button></div>
+</div>
+<div class="fig" id="figTr"></div>
+</div>
+</section>
+
+<!-- ====================== ПІДСУМОК ====================== -->
+<section class="slide" data-sec="8">
+<h2>Підсумок: закінчіть речення</h2>
+<table style="width:100%;font-size:27px">
+<tr><td><b>1</b> Загальне рівняння прямої</td><td><span class="ans"><span>ax + by + c = 0, a і b не одночасно 0</span></span></td></tr>
+<tr><td><b>2</b> a = 0 / b = 0 / c = 0</td><td><span class="ans"><span>∥ Ox / ∥ Oy / через O</span></span></td></tr>
+<tr><td><b>3</b> Точка лежить на прямій, якщо</td><td><span class="ans"><span>її координати задовольняють рівняння</span></span></td></tr>
+<tr><td><b>4</b> Перетин з Ox / з Oy</td><td><span class="ans"><span>y = 0 / x = 0</span></span></td></tr>
+<tr><td><b>5</b> У рівнянні y = kx + <i class="v">l</i> число k</td><td><span class="ans"><span>k = tg α; k &gt; 0 — гострий, k &lt; 0 — тупий</span></span></td></tr>
+<tr><td><b>6</b> Прямі паралельні, якщо</td><td><span class="ans"><span>k₁ = k₂ і <i class="v">l</i>₁ ≠ <i class="v">l</i>₂</span></span></td></tr>
+<tr><td><b>7</b> Точка перетину двох прямих</td><td><span class="ans"><span>розв'язок системи їх рівнянь</span></span></td></tr>
+<tr><td><b>8</b> Рівняння прямої через дві точки</td><td><span class="ans"><span><span class="fr"><span>x − x₁</span><span>x₂ − x₁</span></span> = <span class="fr"><span>y − y₁</span><span>y₂ − y₁</span></span></span></span></td></tr>
+</table>
+</section>
+
+
+
+</div>
+<div id="bar">
+<button id="prev">◀ Назад</button>
+<button id="reset" title="Почати слайд знову">↺</button>
+<span class="sp"></span>
+<span id="count"></span>
+<span class="sp"></span>
+<button id="full">⛶ На весь екран</button>
+<button id="next">Далі ▶</button>
+</div>
+<div id="prog"></div>
+</div>
+
+<script>
+// ---------- масштаб ----------
+const stage=document.getElementById('stage');
+function fit(){stage.style.setProperty('--z',Math.min(innerWidth/820,1.6))}
+addEventListener('resize',fit);fit();
+
+// ---------- числа ----------
+const fmt=v=>{let s=(Math.round(v*100)/100).toString().replace('.',',');return s.replace('-','−')};
+
+// ---------- координатна сітка ----------
+const NS='http://www.w3.org/2000/svg';
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e}
+class Grid{
+  constructor(host,xmin,xmax,ymin,ymax,u,mini){
+    Object.assign(this,{xmin,xmax,ymin,ymax,u});this.pad=28;
+    const W=(xmax-xmin)*u+2*this.pad,H=(ymax-ymin)*u+2*this.pad;
+    this.svg=el('svg',{viewBox:`0 0 ${W} ${H}`,width:W,height:H});host.appendChild(this.svg);
+    const s=this.svg;
+    for(let x=xmin;x<=xmax;x++)el('line',{class:'g',x1:this.X(x),y1:this.Y(ymin),x2:this.X(x),y2:this.Y(ymax)},s);
+    for(let y=ymin;y<=ymax;y++)el('line',{class:'g',x1:this.X(xmin),y1:this.Y(y),x2:this.X(xmax),y2:this.Y(y)},s);
+    const X0=this.X(0),Y0=this.Y(0),xb=this.X(xmax)+16,yb=this.Y(ymax)-16;
+    el('line',{class:'ax',x1:this.X(xmin)-10,y1:Y0,x2:xb,y2:Y0},s);el('polygon',{class:'ah',points:`${xb+6},${Y0} ${xb-8},${Y0-6} ${xb-8},${Y0+6}`},s);
+    el('line',{class:'ax',x1:X0,y1:this.Y(ymin)+10,x2:X0,y2:yb},s);el('polygon',{class:'ah',points:`${X0},${yb-6} ${X0-6},${yb+8} ${X0+6},${yb+8}`},s);
+    this.t(xb-2,Y0+26,'x','al');this.t(X0+12,yb+8,'y','al');
+    this.t(X0-6,Y0+20,'0','tk','end');
+    if(!mini)for(let x=xmin;x<=xmax;x++)if(x)this.t(this.X(x),Y0+20,fmt(x),'tk','middle');
+    if(!mini)for(let y=ymin;y<=ymax;y++)if(y)this.t(X0-6,this.Y(y)+6,fmt(y),'tk','end');
+    this.dyn=el('g',{},s);this.top=el('g',{},s);
+  }
+  X(x){return this.pad+(x-this.xmin)*this.u}
+  Y(y){return this.pad+(this.ymax-y)*this.u}
+  t(x,y,s,cls,anchor='start',parent){const e=el('text',{x,y,class:cls,'text-anchor':anchor},parent||this.svg);e.textContent=s;return e}
+  wrap(o,parent){if(o&&o.step){const g=el('g',{class:'step','data-step':o.step},parent);return g}return parent}
+  clip(a,b,c){const p=[],{xmin,xmax,ymin,ymax}=this,e=1e-9;
+    if(b)for(const x of[xmin,xmax]){const y=-(a*x+c)/b;if(y>=ymin-e&&y<=ymax+e)p.push([x,y])}
+    if(a)for(const y of[ymin,ymax]){const x=-(b*y+c)/a;if(x>=xmin-e&&x<=xmax+e)p.push([x,y])}
+    const r=[];for(const q of p)if(!r.some(z=>Math.abs(z[0]-q[0])<1e-6&&Math.abs(z[1]-q[1])<1e-6))r.push(q);return r}
+  line(a,b,c,o={},parent){const P=this.wrap(o,parent||this.dyn);const r=this.clip(a,b,c);if(r.length<2)return;
+    el('line',{class:'ln '+(o.cls||'c1'),x1:this.X(r[0][0]),y1:this.Y(r[0][1]),x2:this.X(r[1][0]),y2:this.Y(r[1][1])},P);
+    if(o.label)this.t(this.X(o.at[0])+(o.dx||0),this.Y(o.at[1])+(o.dy||0),o.label,'ll '+(o.cls||'c1'),o.anchor||'start',P);return P}
+  seg(p,q,o={},parent){const P=this.wrap(o,parent||this.dyn);el('line',{class:o.cls||'sg',x1:this.X(p[0]),y1:this.Y(p[1]),x2:this.X(q[0]),y2:this.Y(q[1])},P);return P}
+  pt(x,y,o={},parent){const P=this.wrap(o,parent||this.top);el('circle',{class:'pt '+(o.cls||''),cx:this.X(x),cy:this.Y(y),r:o.r||7},P);
+    if(o.label)this.t(this.X(x)+(o.dx??10),this.Y(y)+(o.dy??-10),o.label,'pl',o.anchor||'start',P);return P}
+  poly(pts,o={},parent){const P=this.wrap(o,parent||this.dyn);el('polygon',{class:o.cls||'fill',points:pts.map(p=>this.X(p[0])+','+this.Y(p[1])).join(' ')},P);return P}
+  ra(at,d1,d2,s=.35,o={},parent){const P=this.wrap(o,parent||this.dyn);const n=d=>{const l=Math.hypot(...d);return[d[0]/l*s,d[1]/l*s]};const a=n(d1),b=n(d2);
+    const p=[[at[0]+a[0],at[1]+a[1]],[at[0]+a[0]+b[0],at[1]+a[1]+b[1]],[at[0]+b[0],at[1]+b[1]]];
+    el('polyline',{class:'mk',points:p.map(q=>this.X(q[0])+','+this.Y(q[1])).join(' ')},P);return P}
+  arc(at,deg,o={},parent){const P=this.wrap(o,parent||this.dyn);const R=(o.r||1)*this.u,cx=this.X(at[0]),cy=this.Y(at[1]),a=deg*Math.PI/180;
+    el('path',{class:'mk',d:`M${cx+R},${cy} A${R},${R} 0 ${deg>180?1:0} 0 ${cx+R*Math.cos(a)},${cy-R*Math.sin(a)}`},P);
+    const m=a/2,L=R+24;const t=this.t(cx+L*Math.cos(m),cy-L*Math.sin(m)+8,'α','pl','middle',P);t.style.fontStyle='italic';return P}
+}
+
+// ---------- рисунки ----------
+const F={};
+F.figSpec=h=>{const g=new Grid(h,-4,4,-3,4,46);
+  g.line(0,1,-3,{cls:'c1',label:'y = 3',at:[-3.9,3],dy:-10,step:1});
+  g.line(1,0,2,{cls:'c2',label:'x = −2',at:[-2,-2.6],dx:-12,anchor:'end',step:2});
+  g.line(2,-1,0,{cls:'c3',label:'2x − y = 0',at:[0.9,-2.2],dx:0,step:3});};
+F.figBel=h=>{const g=new Grid(h,-2,4,-1,6,62);
+  g.line(2,1,-4,{cls:'c1',label:'2x + y − 4 = 0',at:[0.1,4.3],dx:14,dy:0});
+  g.pt(1,2,{label:'K(1; 2)',cls:'ok',dx:14,dy:6,step:1});g.pt(-1,5,{label:'R(−1; 5)',cls:'bad',dx:14,dy:-8,step:2});};
+F.figAx1=h=>{const g=new Grid(h,-3,5,-5,3,58);
+  g.line(3,-2,-6,{cls:'c1',label:'3x − 2y − 6 = 0',at:[3.1,1.2],dx:-14,dy:-6,anchor:'end',step:3});
+  g.pt(2,0,{label:'(2; 0)',dx:12,dy:26,cls:'ok',step:1});g.pt(0,-3,{label:'(0; −3)',dx:14,dy:10,cls:'ok',step:2});};
+F.figAx2=h=>{const g=new Grid(h,-5,2,-2,6,62);
+  g.poly([[-3,0],[0,0],[0,4]],{step:4});
+  g.line(4,-3,12,{cls:'c1',label:'4x − 3y + 12 = 0',at:[-4.6,-1.6],dx:0,dy:0,step:3});
+  g.pt(-3,0,{label:'(−3; 0)',dx:-10,dy:-12,anchor:'end',cls:'ok',step:1});g.pt(0,4,{label:'(0; 4)',dx:14,dy:4,cls:'ok',step:2});};
+F.figTg=h=>{const g=new Grid(h,-5,3,-2,5,64);
+  g.line(3,-4,12,{cls:'c1',label:'y = ¾x + 3',at:[0.5,3.4],dx:6,dy:30});
+  g.seg([-4,0],[0,0],{cls:'leg',step:3});g.seg([0,0],[0,3],{cls:'leg',step:3});g.ra([0,0],[-1,0],[0,1],.3,{step:3});
+  g.arc([-4,0],Math.atan2(3,4)*180/Math.PI,{r:1.3,step:2});
+  g.pt(-4,0,{label:'A',dx:-8,dy:-12,anchor:'end'});g.pt(0,3,{label:'B',dx:-12,dy:-10,anchor:'end'});};
+// міні-графіки до розташування
+function mini(h,k,l,o={}){const g=new Grid(h,-4,4,-4,4,38,true);
+  g.line(k,-1,l,{cls:o.cls||'c1'});
+  if(o.alpha&&k){const x0=-l/k;if(x0>-4&&x0<4){let a=Math.atan(k)*180/Math.PI;if(a<0)a+=180;g.arc([x0,0],a,{r:0.9});}}
+  if(o.pt){g.pt(0,l,{r:8,cls:'ok',label:o.pt,dx:12,dy:l>=0?-10:26});}
+  return g}
+F.mkK1=h=>mini(h,2,1,{alpha:1});F.mkK2=h=>mini(h,-1,2,{alpha:1,cls:'c2'});F.mkK3=h=>mini(h,0,2,{cls:'c3'});
+F.mkL1=h=>mini(h,1,2,{pt:'(0; 2)'});F.mkL2=h=>mini(h,1,-2,{pt:'(0; −2)',cls:'c2'});F.mkL3=h=>mini(h,1,0,{pt:'O',cls:'c3'});
+
+// тренажер: прямі на рисунку і рівняння зі списку
+const ROUNDS=[
+ {lines:[{n:'a',a:2,b:-1,c:1,at:[1.75,4.5]},{n:'b',a:-1,b:-1,c:3,at:[-1.5,4.5]},{n:'c',a:0.5,b:-1,c:-2,at:[4.3,0.15]},{n:'d',a:0,b:1,c:3,at:[-4.6,-3]}],
+  eqs:[['y = 2x + 1','a'],['y = −x + 3','b'],['y = ½x − 2','c'],['y = −3','d'],['y = −2x + 1',''],['y = 2x − 1',''],['y = x + 3',''],['x = −3','']]},
+ {lines:[{n:'a',a:1,b:0,c:-2,at:[2,4.4]},{n:'b',a:1,b:1,c:0,at:[-4.4,4.4]},{n:'c',a:1,b:-2,c:4,at:[3.5,3.75]},{n:'d',a:3,b:1,c:-3,at:[2.6,-4.6]}],
+  eqs:[['x = 2','a'],['y = −x','b'],['x − 2y + 4 = 0','c'],['3x + y − 3 = 0','d'],['y = 2',''],['y = x',''],['2x − y + 4 = 0',''],['x + 3y − 3 = 0','']]},
+ {lines:[{n:'a',a:1,b:-1,c:2,at:[2.4,4.4]},{n:'b',a:1,b:-1,c:-1,at:[4.3,3.3]},{n:'c',a:-2,b:-1,c:4,at:[3.6,-3.2]},{n:'d',a:-2,b:-1,c:-2,at:[-3.2,4.4]}],
+  eqs:[['y = x + 2','a'],['y = x − 1','b'],['y = −2x + 4','c'],['y = −2x − 2','d'],['y = −x + 2',''],['y = 2x + 4',''],['y = x + 1',''],['y = 2x − 2','']]}
+];
+const TRC=['c1','c2','c3','c4'],TRV=['--acc','--acc2','--blue','--purple'];
+F.figTr=h=>{const g=new Grid(h,-5,5,-5,5,52);const L=el('g',{},g.dyn);
+  let r=0,sel=null,found={};
+  const msg=document.getElementById('trMsg'),letB=document.getElementById('trLet'),eqB=document.getElementById('trEqs');
+  function shuffle(a){a=a.slice();let seed=r*7+3;for(let i=a.length-1;i>0;i--){seed=(seed*9301+49297)%233280;const j=Math.floor(seed/233280*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+  function pick(n){if(found[n])return;sel=n;draw()}
+  function draw(){const R=ROUNDS[r];L.innerHTML='';
+    R.lines.forEach((ln,i)=>{const P=el('g',{},L);g.line(ln.a,ln.b,ln.c,{cls:TRC[i]+(sel===ln.n||found[ln.n]?' big':'')},P);
+      const q=g.clip(ln.a,ln.b,ln.c);const hit=el('line',{class:'hit',x1:g.X(q[0][0]),y1:g.Y(q[0][1]),x2:g.X(q[1][0]),y2:g.Y(q[1][1])},P);hit.onclick=()=>pick(ln.n);
+      const t=g.t(g.X(ln.at[0]),g.Y(ln.at[1]),ln.n,'ll '+TRC[i],'middle',P);t.style.fontSize='34px'});
+    letB.innerHTML='';R.lines.forEach((ln,i)=>{const b=document.createElement('button');b.className='tr-let'+(sel===ln.n?' sel':'')+(found[ln.n]?' done':'');b.textContent=ln.n;b.style.color=`var(${TRV[i]})`;b.onclick=()=>pick(ln.n);letB.appendChild(b)});
+    document.getElementById('trNum').textContent=`Завдання ${r+1} з ${ROUNDS.length}`;
+    const n=Object.keys(found).length;
+    if(n===4)msg.innerHTML='<span class="eqok">Усі рівняння знайдено! 🎉</span>';
+    else if(sel)msg.innerHTML=`Пряма <i>${sel}</i>: виберіть рівняння`;
+    else msg.innerHTML=`<span class="muted">Знайдено ${n} з 4</span>`}
+  function build(){const R=ROUNDS[r];eqB.innerHTML='';
+    shuffle(R.eqs).forEach(([txt,ans])=>{const b=document.createElement('button');b.className='tr-eq';b.innerHTML=`<span>${txt}</span><span class="tag2"></span>`;
+      b.onclick=()=>{if(b.classList.contains('ok'))return;if(!sel){msg.innerHTML='<span class="muted">Спочатку виберіть пряму</span>';return}
+        if(ans===sel){b.classList.add('ok');const i=R.lines.findIndex(x=>x.n===sel);b.querySelector('.tag2').textContent=sel;b.querySelector('.tag2').style.color=`var(${TRV[i]})`;found[sel]=1;sel=null;draw()}
+        else{b.classList.remove('bad');void b.offsetWidth;b.classList.add('bad');msg.innerHTML='<span class="eqno">Ні, спробуйте ще раз</span>'}};
+      b.dataset.ans=ans;eqB.appendChild(b)});draw()}
+  function go(k){r=(k+ROUNDS.length)%ROUNDS.length;sel=null;found={};build()}
+  document.getElementById('trPrev').onclick=()=>go(r-1);document.getElementById('trNext').onclick=()=>go(r+1);
+  document.getElementById('trReset').onclick=()=>go(r);
+  document.getElementById('trShow').onclick=()=>{const R=ROUNDS[r];eqB.querySelectorAll('.tr-eq').forEach(b=>{const a=b.dataset.ans;if(a){b.classList.add('ok');const i=R.lines.findIndex(x=>x.n===a);b.querySelector('.tag2').textContent=a;b.querySelector('.tag2').style.color=`var(${TRV[i]})`;found[a]=1}});sel=null;draw()};
+  F.figTr.reset=()=>go(0);go(0)};
+// задача 1: учень сам проводить пряму
+F.figDraw=h=>{const g=new Grid(h,-5,5,-5,5,47);const L=el('g',{},g.dyn);
+  let M=[-3,2],mode='a',P1=null,P2=null,hover=null,down=false,drawn=null;
+  const msg=document.getElementById('drMsg'),row=document.getElementById('drEqRow'),inp=document.getElementById('drEq');
+  const mpt=el('g',{},g.top);
+  function draw(){L.innerHTML='';mpt.innerHTML='';
+    if(drawn){const [p,q]=drawn;const a=q[1]-p[1],b=p[0]-q[0],c=-(a*p[0]+b*p[1]);g.line(a,b,c,{cls:'c2'},L)}
+    else if(P1&&hover&&(hover[0]!==P1[0]||hover[1]!==P1[1])){const p=P1,q=hover;const a=q[1]-p[1],b=p[0]-q[0],c=-(a*p[0]+b*p[1]);const pg=el('g',{opacity:.45},L);g.line(a,b,c,{cls:'c2'},pg)}
+    if(P1)g.pt(P1[0],P1[1],{r:7,cls:'bad'},L);if(drawn)g.pt(drawn[1][0],drawn[1][1],{r:7,cls:'bad'},L);
+    g.pt(M[0],M[1],{r:9,label:'M',dx:12,dy:-12},mpt);
+    document.getElementById('drM').textContent=`(${M[0]<0?'−'+(-M[0]):M[0]}; ${M[1]<0?'−'+(-M[1]):M[1]})`}
+  const snap=e=>{const r=g.svg.getBoundingClientRect(),sc=r.width/g.svg.viewBox.baseVal.width;
+    const x=Math.round(((e.clientX-r.left)/sc-g.pad)/g.u+g.xmin),y=Math.round(g.ymax-((e.clientY-r.top)/sc-g.pad)/g.u);
+    return [Math.max(g.xmin,Math.min(g.xmax,x)),Math.max(g.ymin,Math.min(g.ymax,y))]};
+  g.svg.style.touchAction='none';
+  g.svg.addEventListener('pointerdown',e=>{g.svg.setPointerCapture(e.pointerId);const p=snap(e);down=true;
+    if(drawn||!P1){drawn=null;P1=p;hover=p;resetEq()}else{hover=p}draw()});
+  g.svg.addEventListener('pointermove',e=>{if(!P1||drawn)return;hover=snap(e);draw()});
+  g.svg.addEventListener('pointerup',e=>{if(!down)return;down=false;const p=snap(e);
+    if(P1&&(p[0]!==P1[0]||p[1]!==P1[1])){drawn=[P1,p];P1=null;hover=null;msg.innerHTML='<span class="muted">Пряму проведено. Натисніть «Перевірити пряму».</span>'}draw()});
+  function resetEq(){row.style.visibility='hidden';inp.value='';inp.classList.remove('right','wrong');msg.innerHTML=''}
+  function setMode(m){mode=m;document.getElementById('drA').className='btn'+(m==='a'?'':' alt');document.getElementById('drB').className='btn'+(m==='b'?'':' alt');
+    document.getElementById('drVar').textContent=m==='a'?'y':'x';drawn=null;P1=null;resetEq();draw()}
+  document.getElementById('drA').onclick=()=>setMode('a');document.getElementById('drB').onclick=()=>setMode('b');
+  document.getElementById('drClear').onclick=()=>{drawn=null;P1=null;resetEq();draw()};
+  function newPoint(){do{M=[rnd(-4,4),rnd(-4,4)]}while(!M[0]||!M[1]);setMode('a')}
+  document.getElementById('drNew').onclick=newPoint;
+  document.getElementById('drCheck').onclick=()=>{if(!drawn){msg.innerHTML='<span class="eqno">Спочатку проведіть пряму</span>';return}
+    const [p,q]=drawn;const through=(q[0]-p[0])*(M[1]-p[1])-(q[1]-p[1])*(M[0]-p[0])===0;
+    const par=mode==='a'?p[1]===q[1]:p[0]===q[0];
+    if(through&&par){msg.innerHTML='<span class="eqok">Правильно! ✓ Тепер запишіть рівняння цієї прямої.</span>';row.style.visibility='visible';inp.focus()}
+    else msg.innerHTML='<span class="eqno">'+(!par?(mode==='a'?'Пряма не паралельна осі Ox.':'Пряма не паралельна осі Oy.'):'')+(!through?' Пряма не проходить через точку M.':'')+' Спробуйте ще раз.</span>'};
+  document.getElementById('drEqCheck').onclick=()=>{const want=mode==='a'?M[1]:M[0];const ok=val(inp.value)===want;inp.classList.toggle('right',ok);inp.classList.toggle('wrong',!ok);
+    msg.innerHTML=ok?`<span class="eqok">Так! ${mode==='a'?'y':'x'} = ${want<0?'−'+(-want):want} 🎉</span>`:'<span class="eqno">Ні. Подивіться, яку '+(mode==='a'?'ординату':'абсцису')+' мають усі точки прямої.</span>'};
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.stopPropagation();document.getElementById('drEqCheck').click()}});
+  F.figDraw.reset=newPoint;newPoint()};
+F.figT3=h=>{const g=new Grid(h,-5,5,-5,5,38);const L=el('g',{},g.dyn);
+  let pts=[],line=null,down=null;
+  const key=p=>p[0]+','+p[1];
+  function draw(){L.innerHTML='';
+    if(line){const [p,q]=line;const a=q[1]-p[1],b=p[0]-q[0],c=-(a*p[0]+b*p[1]);g.line(a,b,c,{cls:'c2'},L)}
+    pts.forEach(p=>g.pt(p[0],p[1],{r:8,cls:'bad'},L))}
+  const snap=e=>{const r=g.svg.getBoundingClientRect(),sc=r.width/g.svg.viewBox.baseVal.width;
+    const x=Math.round(((e.clientX-r.left)/sc-g.pad)/g.u+g.xmin),y=Math.round(g.ymax-((e.clientY-r.top)/sc-g.pad)/g.u);
+    return [Math.max(g.xmin,Math.min(g.xmax,x)),Math.max(g.ymin,Math.min(g.ymax,y))]};
+  let prev=null;g.svg.style.touchAction='none';
+  g.svg.addEventListener('pointerdown',e=>{g.svg.setPointerCapture(e.pointerId);down=snap(e)});
+  g.svg.addEventListener('pointermove',e=>{if(!down)return;const p=snap(e);if(key(p)===key(down))return;
+    draw();const a=p[1]-down[1],b=down[0]-p[0],c=-(a*down[0]+b*down[1]);const pg=el('g',{opacity:.45},L);g.line(a,b,c,{cls:'c2'},pg)});
+  g.svg.addEventListener('pointerup',e=>{if(!down)return;const p=snap(e),d=down;down=null;
+    if(key(p)===key(d)){const i=pts.findIndex(q=>key(q)===key(p));if(i>=0)pts.splice(i,1);else{pts.push(p);if(pts.length>2)pts.shift()}}
+    else line=[d,p];draw()});
+  F.figT3.clear=()=>{pts=[];line=null;draw()};
+  F.figT3.state=()=>({pts,line});
+  draw()};
+F.figParEx=h=>{const g=new Grid(h,-2,3,-4,6,54);
+  g.line(3,1,-5,{cls:'c1',label:'y = −3x + 5',at:[0.45,5.6],dx:12,dy:0,step:3});
+  g.line(3,1,-1,{cls:'c2',label:'y = −3x + 1',at:[1.3,-3.6],dx:-12,dy:0,anchor:'end',step:3});
+  g.pt(1,-2,{label:'M(1; −2)',dx:-14,dy:-10,anchor:'end',step:3});};
+F.figT8=h=>{const g=new Grid(h,-4,6,-1,6,52);const L=el('g',{},g.dyn);
+  let pts=[],lines=[],hist=[],down=null;const key=p=>p[0]+','+p[1];
+  function draw(){L.innerHTML='';lines.forEach(([p,q])=>{const a=q[1]-p[1],b=p[0]-q[0],c=-(a*p[0]+b*p[1]);g.line(a,b,c,{cls:'c2'},L)});
+    pts.forEach(p=>g.pt(p[0],p[1],{r:8,cls:'bad'},L))}
+  const snap=e=>{const r=g.svg.getBoundingClientRect(),sc=r.width/g.svg.viewBox.baseVal.width;
+    const x=Math.round(((e.clientX-r.left)/sc-g.pad)/g.u+g.xmin),y=Math.round(g.ymax-((e.clientY-r.top)/sc-g.pad)/g.u);
+    return [Math.max(g.xmin,Math.min(g.xmax,x)),Math.max(g.ymin,Math.min(g.ymax,y))]};
+  g.svg.style.touchAction='none';
+  g.svg.addEventListener('pointerdown',e=>{g.svg.setPointerCapture(e.pointerId);down=snap(e)});
+  g.svg.addEventListener('pointermove',e=>{if(!down)return;const p=snap(e);if(key(p)===key(down))return;
+    draw();const a=p[1]-down[1],b=down[0]-p[0],c=-(a*down[0]+b*down[1]);const pg=el('g',{opacity:.45},L);g.line(a,b,c,{cls:'c2'},pg)});
+  g.svg.addEventListener('pointerup',e=>{if(!down)return;const p=snap(e),d=down;down=null;
+    if(key(p)===key(d)){const i=pts.findIndex(q=>key(q)===key(p));if(i>=0){pts.splice(i,1);hist.push(['unpt',p])}else{pts.push(p);hist.push(['pt',p])}}
+    else{lines.push([d,p]);hist.push(['ln'])}draw();document.getElementById('t8Msg').innerHTML=''});
+  const on=(ln,p)=>(ln[1][0]-ln[0][0])*(p[1]-ln[0][1])-(ln[1][1]-ln[0][1])*(p[0]-ln[0][0])===0;
+  document.getElementById('t8Undo').onclick=()=>{const h2=hist.pop();if(!h2)return;if(h2[0]==='ln')lines.pop();else if(h2[0]==='pt')pts=pts.filter(q=>key(q)!==key(h2[1]));else pts.push(h2[1]);draw()};
+  const clear=()=>{pts=[];lines=[];hist=[];draw();document.getElementById('t8Msg').innerHTML=''};
+  document.getElementById('t8Clear').onclick=clear;
+  document.getElementById('t8Check').onclick=()=>{const need={A:[-3,0],B:[1,4],C:[5,2],M:[1,1]},has=p=>pts.some(q=>key(q)===key(p));
+    const miss=Object.keys(need).filter(n=>!has(need[n]));const extra=pts.filter(p=>!Object.values(need).some(q=>key(q)===key(p))).length;
+    const bm=lines.some(l=>on(l,need.B)&&on(l,need.M)),par=lines.some(l=>on(l,need.B)&&on(l,[5,5]));
+    const out=[];out.push(miss.length?`Не позначено: ${miss.join(', ')}.`:(extra?'Є зайві точки.':'Точки A, B, C, M — правильно ✓'));
+    out.push(bm?'Пряма BM — правильно ✓':'Немає прямої BM.');out.push(par?'Паралельна до AC через B — правильно ✓':'Немає прямої через B, паралельної AC.');
+    const ok=!miss.length&&!extra&&bm&&par;
+    document.getElementById('t8Msg').innerHTML=ok?'<span class="eqok">Усе правильно! 🎉</span>':out.map(t=>`<span class="${t.includes('✓')?'eqok':'eqno'}">${t}</span>`).join('<br>')};
+  F.figT8.reset=clear;draw()};
+F.figTwo=h=>{const g=new Grid(h,-4,4,-1,5,66);
+  g.line(1,-2,4,{cls:'c1',label:'y = ½x + 2',at:[-0.8,0.7],dx:0,dy:0,step:3});
+  g.pt(-2,1,{label:'A(−2; 1)',dx:-10,dy:-14,anchor:'end'});g.pt(2,3,{label:'B(2; 3)',dx:10,dy:30});};
+F.figAB=h=>{const g=new Grid(h,-2,6,-2,6,64);
+  g.line(2,-1,-1,{cls:'c1',label:'a',at:[3,5],dx:14,dy:6});g.line(1,1,-5,{cls:'c2',label:'b',at:[5,0],dx:10,dy:-12});
+  g.pt(0,-1,{label:'(0; −1)',dx:12,dy:24,cls:'ok',step:1});
+  g.pt(1,1,{label:'(1; 1)',dx:12,dy:20,cls:'ok',step:2});
+  g.pt(0,5,{label:'(0; 5)',dx:12,dy:-8,cls:'ok',step:4});
+  g.pt(5,0,{label:'(5; 0)',dx:-4,dy:38,anchor:'end',cls:'ok',step:5});
+};
+F.figAB2=h=>{const g=new Grid(h,-2,6,-2,6,64);
+  g.line(2,-1,-1,{cls:'c1',label:'y = 2x − 1',at:[3.3,5.6],dx:12,dy:0});g.line(1,1,-5,{cls:'c2',label:'y = −x + 5',at:[3.3,1.7],dx:14,dy:8});
+  g.pt(2,3,{label:'(2; 3)',dx:16,dy:4,step:5,r:9});};
+
+
+// інтерактив: y = kx + l
+F.figKB=h=>{const g=new Grid(h,-5,5,-5,5,54);const L=el('g',{},g.dyn);
+  const kS=document.getElementById('kS'),bS=document.getElementById('bS');
+  function draw(){const k=+kS.value,b=+bS.value;L.innerHTML='';
+    document.getElementById('kO').textContent=fmt(k);document.getElementById('bO').textContent=fmt(b);
+    g.line(k,-1,b,{cls:'c1'},L);g.pt(0,b,{label:`(0; ${fmt(b)})`,dx:12,dy:b>=0?-12:28},L);
+    let al=Math.atan(k)*180/Math.PI;if(al<0)al+=180;
+    if(k!==0){const x0=-b/k;if(x0>g.xmin+0.3&&x0<g.xmax-0.3){g.arc([x0,0],al,{r:k>0?0.9:0.6},L);g.pt(x0,0,{r:5},L)}}
+    const ks=k===0?'':k===1?'':k===-1?'−':fmt(k);
+    let eq='y = '+(k!==0?ks+'x':'')+(b!==0?(k!==0?(b>0?' + ':' − ')+fmt(Math.abs(b)):fmt(b)):(k===0?'0':''));
+    document.getElementById('kbEq').textContent=eq;
+    const kt=k>0?`k &gt; 0: кут α гострий (α ≈ ${Math.round(al)}°), пряма «піднімається» ↗`:k<0?`k &lt; 0: кут α тупий (α ≈ ${Math.round(al)}°), пряма «спускається» ↘`:'k = 0: пряма паралельна осі Ox';
+    const bt=b>0?'<i class="v">l</i> &gt; 0: перетинає Oy вище точки O':b<0?'<i class="v">l</i> &lt; 0: перетинає Oy нижче точки O':'<i class="v">l</i> = 0: проходить через початок координат';
+    document.getElementById('kbTxt').innerHTML=`<p style="margin:6px 0">${kt}</p><p style="margin:6px 0">${bt}</p>`}
+  kS.oninput=bS.oninput=draw;
+  document.querySelectorAll('[data-k]').forEach(btn=>{if(btn.tagName==='BUTTON')btn.onclick=()=>{kS.value=btn.dataset.k;draw()}});
+  F.figKB.reset=()=>{kS.value=1;bS.value=1;draw()};draw()};
+
+// інтерактив: паралельність
+F.figPar=h=>{const g=new Grid(h,-5,5,-4,5,58);const L=el('g',{},g.dyn);
+  const a=document.getElementById('k1S'),b=document.getElementById('k2S');
+  function draw(){const k1=+a.value,k2=+b.value;L.innerHTML='';
+    document.getElementById('k1O').textContent=fmt(k1);document.getElementById('k2O').textContent=fmt(k2);
+    g.line(k1,-1,2,{cls:'c1'},L);g.line(k2,-1,-1,{cls:'c2'},L);
+    g.t(g.X(-4.8),g.Y(4.4),`y = ${fmt(k1)}x + 2`,'ll c1','start',L);g.t(g.X(-4.8),g.Y(-3.5),`y = ${fmt(k2)}x − 1`,'ll c2','start',L);
+    const t=document.getElementById('parTxt');
+    if(k1===k2)t.innerHTML='<span class="eqok">k₁ = k₂ → прямі паралельні</span>';
+    else{const x=-3/(k1-k2),y=k1*x+2;if(x>=g.xmin&&x<=g.xmax&&y>=g.ymin&&y<=g.ymax)g.pt(x,y,{r:8},L);t.innerHTML=`<span class="eqno">k₁ ≠ k₂ → прямі перетинаються</span>`}}
+  a.oninput=b.oninput=draw;F.figPar.reset=()=>{a.value=.5;b.value=-.5;draw()};draw()};
+
+
+// ---------- навігація ----------
+const slides=[...document.querySelectorAll('.slide')];let cur=0;
+const NAV=[[1,'1','Загальне рівняння'],[2,'2','Окремі випадки'],[3,'3','Належність точок'],[4,'4','Перетин з осями'],[5,'5','Кутовий коефіцієнт'],[6,'6','Паралельність'],[10,'7','Точка перетину'],[7,'8','Через дві точки'],[9,'🎯','Тренажер'],[8,'✓','Підсумок']];
+const nav=document.getElementById('nav');
+const hb=document.createElement('button');hb.className='home';hb.textContent='⌂';hb.onclick=()=>go(0);nav.appendChild(hb);
+NAV.forEach(([sec,ic,n])=>{const b=document.createElement('button');b.dataset.sec=sec;b.innerHTML=`<b>${ic}</b>${n}`;b.onclick=()=>goSec(sec);nav.appendChild(b)});
+document.querySelectorAll('.toc button').forEach(b=>b.onclick=()=>goSec(+b.dataset.go));
+function goSec(s){const i=slides.findIndex(x=>+x.dataset.sec===s);if(i>=0)go(i)}
+function pending(){const st=[...slides[cur].querySelectorAll('[data-step]:not(.on)')].map(e=>+e.dataset.step);return st.length?Math.min(...st):null}
+function upd(){slides.forEach((s,i)=>s.classList.toggle('cur',i===cur));
+  const sec=+slides[cur].dataset.sec;nav.querySelectorAll('button[data-sec]').forEach(b=>b.classList.toggle('cur',+b.dataset.sec===sec));
+  document.getElementById('count').textContent=`${cur+1} / ${slides.length}`;
+  document.getElementById('prog').style.width=(100*(cur+1)/slides.length)+'%';
+  const nx=document.getElementById('next');const p=pending();nx.classList.toggle('reveal',p!==null);nx.textContent=p!==null?'Показати ▼':'Далі ▶'}
+function go(i){cur=Math.max(0,Math.min(slides.length-1,i));upd();window.scrollTo(0,0)}
+function next(){const p=pending();if(p!==null){const els=slides[cur].querySelectorAll(`[data-step="${p}"]`);els.forEach(e=>e.classList.add('on'));upd();const l=els[els.length-1];if(l&&l.scrollIntoView)l.scrollIntoView({block:'center',behavior:'smooth'})}else go(cur+1)}
+function prev(){go(cur-1)}
+function reset(){const s=slides[cur];s.querySelectorAll('.on').forEach(e=>e.classList.remove('on'));s.querySelectorAll('.ans.open').forEach(e=>e.classList.remove('open'));
+  s.querySelectorAll('.opt').forEach(e=>e.classList.remove('right','wrong'));
+  for(const id in F)if(s.querySelector('#'+id)&&F[id].reset)F[id].reset();
+  s.querySelectorAll('.sorter').forEach(so=>so.reset&&so.reset());clearInputs(s);if(s.querySelector('#abcTab'))genABC();if(s.querySelector('#gapBox'))genGaps();if(s.querySelector('#axBox'))genAx();if(s.querySelector('#t3Eq'))genT3();if(s.querySelector('#sgNew'))genSg();if(s.querySelector('#z4Box'))genZ4();upd()}
+document.getElementById('next').onclick=next;document.getElementById('prev').onclick=prev;document.getElementById('reset').onclick=reset;
+document.getElementById('full').onclick=()=>{if(document.fullscreenElement)document.exitFullscreen();else document.documentElement.requestFullscreen().catch(()=>{})};
+addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;
+  if(['ArrowRight','PageDown',' ','Enter'].includes(e.key)){e.preventDefault();next()}
+  else if(['ArrowLeft','PageUp','Backspace'].includes(e.key)){e.preventDefault();prev()}
+  else if(e.key==='Home')go(0);else if(e.key==='f'||e.key==='F')document.getElementById('full').click()});
+
+// ---------- введення чисел ----------
+const norm=v=>v.replace(/\s/g,'').replace(/[−–—]/g,'-').replace(',','.');
+let lastInput=null;
+['slides','stage'].forEach(id=>{const e=document.getElementById(id);e.addEventListener('scroll',()=>{e.scrollTop=0;e.scrollLeft=0})});
+
+document.addEventListener('focusin',e=>{if(e.target.matches('input.num'))lastInput=e.target});
+document.addEventListener('input',e=>{const inp=e.target;if(!inp.matches('input.num'))return;inp.classList.remove('right','wrong');inp.value=inp.value.replace(/-/g,'−')});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches('input.num')){const b=e.target.closest('.slide').querySelector('[data-check]');if(b)b.click()}});
+document.querySelectorAll('.keypad').forEach(kp=>{['7','8','9','4','5','6','1','2','3','−','0','⌫'].forEach(k=>{const b=document.createElement('button');b.textContent=k;
+  b.addEventListener('pointerdown',e=>e.preventDefault());
+  b.onclick=()=>{const sl=kp.closest('.slide');let inp=lastInput&&sl.contains(lastInput)?lastInput:sl.querySelector('input.num');if(!inp)return;
+    inp.classList.remove('right','wrong');if(k==='⌫')inp.value=inp.value.slice(0,-1);else if(k==='−')inp.value=inp.value.startsWith('−')?inp.value.slice(1):'−'+inp.value;else inp.value+=k;inp.focus()};kp.appendChild(b)})});
+const val=v=>{const t=norm(v);return t===''||t==='-'?NaN:parseFloat(t)};
+function checkInputs(sl){let ok=0,n=0;
+  sl.querySelectorAll('tr').forEach(tr=>{const ins=[...tr.querySelectorAll('input.num')];if(!ins.length)return;n+=ins.length;
+    const signs=tr.dataset.flip?[1,-1]:[1];let best=null,bs=-1;
+    signs.forEach(sg=>{const r=ins.map(i=>val(i.value)===sg*val(i.dataset.a)||(val(i.value)===0&&val(i.dataset.a)===0));const c=r.filter(Boolean).length;if(c>bs){bs=c;best=r}});
+    ins.forEach((i,k)=>{if(i.value.trim()===''){i.classList.remove('right','wrong');return}i.classList.toggle('right',best[k]);i.classList.toggle('wrong',!best[k]);if(best[k])ok++})});
+  sl.querySelectorAll('input.num').forEach(i=>{if(i.closest('tr')||i.id==='drEq')return;n++;if(i.value.trim()===''){i.classList.remove('right','wrong');return}const r=val(i.value)===val(i.dataset.a);i.classList.toggle('right',r);i.classList.toggle('wrong',!r);if(r)ok++});
+  const m=sl.querySelector('[data-msg]');if(m)m.innerHTML=ok===n?'<span class="eqok">Усе правильно! 🎉</span>':`Правильно ${ok} з ${n}`}
+function clearInputs(sl){sl.querySelectorAll('input.num').forEach(i=>{i.value='';i.classList.remove('right','wrong')});const m=sl.querySelector('[data-msg]');if(m)m.innerHTML=''}
+document.querySelectorAll('[data-check]').forEach(b=>b.onclick=()=>{const sl=b.closest('.slide');checkInputs(sl);
+  const box=sl.querySelector('#axBox');if(box){const ok=p=>[...box.querySelectorAll(`input[data-part="${p}"]`)].every(i=>i.classList.contains('right'));drawAx(ok('A'),ok('B'))}
+  if(sl.querySelector('#t3Eq'))checkT3(sl);
+  sl.querySelectorAll('.ansblk').forEach(c=>{const ins=[...c.querySelectorAll('input.num')];c.classList.toggle('done',ins.length>0&&ins.every(i=>i.classList.contains('right')))});
+  const z4=sl.querySelector('#z4Box');if(z4)z4.querySelectorAll('.two>div').forEach(c=>c.classList.toggle('done',[...c.querySelectorAll('input.num')].every(i=>i.classList.contains('right'))))});
+document.querySelectorAll('[data-clear]').forEach(b=>b.onclick=()=>clearInputs(b.closest('.slide')));
+
+// ---------- слайд 3: щоразу нові рівняння ----------
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const nz=(m)=>{let v=0;while(!v)v=rnd(-m,m);return v};
+const M=v=>String(v).replace('-','−');
+function lin(terms){let out='';terms.forEach(([c,v])=>{if(c===0)return;const neg=c<0,abs=Math.abs(c);
+  const body=v?(abs===1?v:abs+v):String(abs);out+=out===''?(neg?'−':'')+body:(neg?' − ':' + ')+body});return out||'0'}
+function genABC(){const rows=[];
+  // 1) повне загальне рівняння
+  let a=nz(9),b=nz(9),c=nz(9);rows.push({eq:lin([[a,'x'],[b,'y'],[c,'']])+' = 0',a,b,c});
+  // 2) окремий випадок (один коефіцієнт нуль)
+  const t=rnd(0,2);
+  if(t===0){a=nz(9);c=nz(9);rows.push({eq:lin([[a,'x'],[c,'']])+' = 0',a,b:0,c})}
+  else if(t===1){b=nz(9);c=nz(9);rows.push({eq:lin([[b,'y'],[c,'']])+' = 0',a:0,b,c})}
+  else{a=nz(9);b=nz(9);rows.push({eq:lin([[a,'x'],[b,'y']])+' = 0',a,b,c:0})}
+  // 3) рівняння, яке треба спочатку перетворити
+  const u=rnd(0,3);
+  if(u===0){const k=nz(6),m=nz(9);rows.push({eq:'y = '+lin([[k,'x'],[m,'']]),a:k,b:-1,c:m,flip:1})}
+  else if(u===1){a=nz(9);b=nz(9);const q=nz(9);rows.push({eq:lin([[a,'x'],[b,'y']])+' = '+M(q),a,b,c:-q,flip:1})}
+  else if(u===2){const q=nz(9);rows.push({eq:'y = '+M(q),a:0,b:1,c:-q,flip:1})}
+  else{const q=nz(9);rows.push({eq:'x = '+M(q),a:1,b:0,c:-q,flip:1})}
+  const tab=document.getElementById('abcTab');tab.querySelectorAll('tr.gen').forEach(r=>r.remove());
+  rows.forEach(r=>{const tr=document.createElement('tr');tr.className='gen';if(r.flip)tr.dataset.flip='1';
+    tr.innerHTML=`<td style="white-space:nowrap;font-weight:600">${r.eq}</td>`+['a','b','c'].map(k=>`<td><input inputmode="none" class="num" data-a="${M(r[k])}" autocomplete="off"></td>`).join('');tab.appendChild(tr)});
+  const m=tab.closest('.slide').querySelector('[data-msg]');if(m)m.innerHTML='';lastInput=null}
+document.getElementById('abcNew').onclick=genABC;genABC();
+// ---------- задача 2: розв'язання з пропусками ----------
+function genGaps(){const box=document.getElementById('gapBox');if(!box)return;
+  const B=v=>`<input inputmode="none" class="num sm" inputmode="none" data-a="${M(v)}" autocomplete="off">`;
+  const P=v=>v<0?`(${M(v)})`:M(v);
+  // а) точка M(m; y0) на прямій p·x + y + C = 0
+  const p=[2,3,4,-2,-3][Math.floor(Math.random()*5)],m=nz(4),y0=nz(6),C=-(p*m+y0);
+  // б) пряма a·x + b·y + c = 0 через (x0; y0)
+  const a=nz(5),b=nz(5),x1=nz(4),y1=nz(4),sum=a*x1+b*y1;
+  box.innerHTML=`<div class="gcol ansblk">
+  <p><b>а)</b> При якому значенні m точка <b>M(m; ${M(y0)})</b> лежить на прямій <b>${lin([[p,'x'],[1,'y'],[C,'']]).replace(/ /g,'&nbsp;')}&nbsp;=&nbsp;0</b>?</p>
+  <div class="gl">Підставляємо x = m, y = ${B(y0)}:</div>
+  <div class="gl">${M(p)}·m + ${P(y0)} ${C<0?'−':'+'} ${Math.abs(C)} = 0</div>
+  <div class="gl">${M(p)}·m = ${B(-y0-C)}</div>
+  <div class="gl">m = ${B(m)}</div>
+  <div class="gl z4ans">Відповідь: m = ${M(m)}</div></div><div class="gcol ansblk"><p><b>б)</b> При якому значенні c пряма <b>${lin([[a,'x'],[b,'y']]).replace(/ /g,'&nbsp;')}&nbsp;+&nbsp;c&nbsp;=&nbsp;0</b> проходить через точку <b>(${M(x1)}; ${M(y1)})</b>?</p>
+  <div class="gl">${M(a)}·${B(x1)} ${b<0?'−':'+'} ${Math.abs(b)}·${B(y1)} + c = 0</div>
+  <div class="gl">${B(sum)} + c = 0</div>
+  <div class="gl">c = ${B(-sum)}</div><div class="gl z4ans">Відповідь: c = ${M(-sum)}</div></div>`;
+  const sl=box.closest('.slide');const msg=sl.querySelector('[data-msg]');if(msg)msg.innerHTML='';lastInput=null}
+document.getElementById('gapNew').onclick=genGaps;genGaps();
+// ---------- перетин з осями: розв'язання з пропусками ----------
+let AX=null;
+function axSteps(o,two){const {a,b,c,x0,y0}=o;let part='A';
+  const B=v=>`<input inputmode="none" class="num sm" inputmode="none" data-part="${part}" data-a="${M(v)}" autocomplete="off">`;
+  const S=(v,t)=>`${v<0?'−':'+'} ${Math.abs(v)}${t}`;
+  const p1=`<div class="ah"><span class="cx">1) Перетин з віссю Ox</span></div>
+  <div class="gl">y = ${B(0)}</div>
+  <div class="gl">${a===1?'':a}x ${S(b,'·0')} ${S(c,'')} = 0</div>
+  ${a===1?'':`<div class="gl">${lin([[a,'x']])} = ${B(-c)}</div>`}
+  <div class="gl">x = ${B(x0)}</div>
+  <div class="gl">Точка <span class="cx">A</span>(${B(x0)}; ${B(0)})</div>`;part='B';
+  const p2=`<div class="ah"><span class="cy">2) Перетин з віссю Oy</span></div>
+  <div class="gl">x = ${B(0)}</div>
+  <div class="gl">${a}·0 ${b<0?'−':'+'} ${Math.abs(b)===1?'':Math.abs(b)}y ${S(c,'')} = 0</div>
+  ${b===1?'':`<div class="gl">${lin([[b,'y']])} = ${B(-c)}</div>`}
+  <div class="gl">y = ${B(y0)}</div>
+  <div class="gl">Точка <span class="cy">B</span>(${B(0)}; ${B(y0)})</div>`;
+  return two?`<div class="two"><div>${p1}</div><div>${p2}</div></div>`:p1+p2}
+function genAx(){const box=document.getElementById('axBox');if(!box)return;
+  let part='A';const B=v=>`<input inputmode="none" class="num sm" inputmode="none" data-part="${part}" data-a="${M(v)}" autocomplete="off">`;
+  const gcd=(p,q)=>q?gcd(q,p%q):Math.abs(p);
+  let x0,y0,a,b,c;do{x0=nz(4);y0=nz(4);a=y0;b=x0;c=-x0*y0;const g=gcd(gcd(a,b),c);a/=g;b/=g;c/=g;if(a<0){a=-a;b=-b;c=-c}}while(Math.abs(a)===1&&Math.abs(b)===1&&Math.random()<.7);
+  AX={a,b,c,x0,y0};
+  const S=(v,t)=>`${v<0?'−':'+'} ${Math.abs(v)}${t}`;
+  const eq=lin([[a,'x'],[b,'y'],[c,'']])+' = 0';
+  box.innerHTML=`<p style="margin:0 0 4px">Знайдіть точки перетину прямої <b style="white-space:nowrap">${eq}</b> з осями координат і побудуйте її.</p>
+  ${axSteps(AX,true)}
+  <div class="ah">3) Через точки A і B проводимо пряму.</div>`;
+  const sl=box.closest('.slide');const msg=sl.querySelector('[data-msg]');if(msg)msg.innerHTML='';lastInput=null;drawAx(false,false)}
+function drawAx(okA,okB){const h=document.getElementById('axFig');if(!h||!AX)return;h.innerHTML='';
+  const g=new Grid(h,-5,5,-5,5,36);
+  if(okA&&okB)g.line(AX.a,AX.b,AX.c,{cls:'c1'});
+  if(okA)g.pt(AX.x0,0,{label:'A',dx:AX.x0>0?6:-26,dy:-12,cls:'ok'});
+  if(okB)g.pt(0,AX.y0,{label:'B',dx:-30,dy:AX.y0>0?-6:22,cls:'ok'})}
+
+
+// ---------- сортування по групах ----------
+const pickOne=arr=>arr[Math.floor(Math.random()*arr.length)];
+function shuffleR(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function uniq(gen,n){const out=[],seen=new Set();let guard=0;while(out.length<n&&guard++<200){const c=gen();if(!seen.has(c[0])){seen.add(c[0]);out.push(c)}}return out}
+const GEN={
+  lines:()=>{const yes=[()=>[lin([[nz(9),'x'],[nz(9),'y'],[nz(9),'']])+' = 0',0],()=>['y = '+M(nz(9)),0],()=>['x = '+M(nz(9)),0],
+      ()=>[lin([[nz(9),'x'],[nz(9),'y']])+' = 0',0],()=>['y = '+lin([[nz(5),'x'],[nz(9),'']]),0],()=>[lin([[nz(9),'x'],[nz(9),'y']])+' = '+M(nz(9)),0]];
+    const no=[()=>[lin([[nz(5),'x²'],[nz(5),'y']])+' = '+M(nz(9)),1],()=>['xy = '+M(nz(9)),1],()=>['0·x + 0·y '+(Math.random()<.5?'+ ':'− ')+rnd(1,9)+' = 0',1],
+      ()=>['x² + y² = '+rnd(1,9)**2,1],()=>['y = '+lin([[nz(3),'x²'],[nz(9),'']]),1],()=>[lin([[nz(5),'x'],[nz(5),'y²']])+' = 0',1]];
+    return shuffleR([...uniq(()=>pickOne(yes)(),3),...uniq(()=>pickOne(no)(),3)])},
+  spec:()=>{const ox=[()=>[lin([[nz(9),'y'],[nz(9),'']])+' = 0',0],()=>['y = '+M(nz(9)),0]],
+      oy=[()=>[lin([[nz(9),'x'],[nz(9),'']])+' = 0',1],()=>['x = '+M(nz(9)),1]],
+      oo=[()=>[lin([[nz(9),'x'],[nz(9),'y']])+' = 0',2],()=>['y = '+lin([[nz(5),'x']]),2]];
+    return shuffleR([...uniq(()=>pickOne(ox)(),2),...uniq(()=>pickOne(oy)(),2),...uniq(()=>pickOne(oo)(),2)])},
+  points:(so)=>{const k=pickOne([1,-1,2,-2,3,-3]),m=rnd(-4,4);
+    const t=so.closest('.slide').querySelector('[data-line]');if(t)t.textContent=(k>0?lin([[k,'x'],[-1,'y'],[m,'']]):lin([[-k,'x'],[1,'y'],[-m,'']]))+' = 0';
+    const P=(x,y)=>`(${M(x)}; ${M(y)})`;const xs=shuffleR([-3,-2,-1,0,1,2,3]);
+    const on=xs.slice(0,3).map(x=>[P(x,k*x+m),0]);const off=xs.slice(3,6).map(x=>[P(x,k*x+m+nz(3)),1]);
+    return shuffleR([...on,...off])}
+};
+document.querySelectorAll('.sorter').forEach(so=>{
+  const pool=so.querySelector('.pool'),msg=so.querySelector('[data-msg]');let sel=null;
+  function place(c,target){c.classList.remove('right','wrong','sel');target.appendChild(c);sel=null;msg.innerHTML=''}
+  so.querySelectorAll('.bin').forEach(b=>b.addEventListener('click',e=>{if(sel&&!e.target.closest('.card2'))place(sel,b)}));
+  pool.addEventListener('click',e=>{if(sel&&!e.target.closest('.card2'))place(sel,pool)});
+  function attach(c){let sx,sy,moved=false,id=null;
+    c.addEventListener('pointerdown',e=>{sx=e.clientX;sy=e.clientY;moved=false;id=e.pointerId;c.setPointerCapture(id)});
+    c.addEventListener('pointermove',e=>{if(id===null)return;const dx=e.clientX-sx,dy=e.clientY-sy;if(!moved&&Math.hypot(dx,dy)<8)return;
+      moved=true;const sc=stage.getBoundingClientRect().width/820;c.classList.add('drag');c.style.transform=`translate(${dx/sc}px,${dy/sc}px)`;
+      so.querySelectorAll('.bin,.pool').forEach(b=>b.classList.remove('over'));c.style.visibility='hidden';const under=document.elementFromPoint(e.clientX,e.clientY);c.style.visibility='';
+      const t=under&&under.closest('.bin');if(t&&so.contains(t))t.classList.add('over')});
+    c.addEventListener('pointerup',e=>{if(id===null)return;id=null;c.classList.remove('drag');c.style.transform='';so.querySelectorAll('.bin').forEach(b=>b.classList.remove('over'));
+      if(moved){c.style.visibility='hidden';const under=document.elementFromPoint(e.clientX,e.clientY);c.style.visibility='';
+        const t=under&&(under.closest('.bin')||under.closest('.pool'));if(t&&so.contains(t))place(c,t)}
+      else{if(sel===c){c.classList.remove('sel');sel=null}else{if(sel)sel.classList.remove('sel');sel=c;c.classList.add('sel')}}})}
+  function fill(){so.querySelectorAll('.card2').forEach(c=>c.remove());sel=null;msg.innerHTML='';
+    if(so.dataset.gen){GEN[so.dataset.gen](so).forEach(([t,g])=>{const c=document.createElement('div');c.className='card2';c.dataset.g=g;c.textContent=t;pool.appendChild(c);attach(c)})}
+    else (so._orig||(so._orig=[...so.querySelectorAll('.card2')])).forEach(c=>{c.classList.remove('right','wrong','sel');pool.appendChild(c)})}
+  if(!so.dataset.gen){so._orig=[...so.querySelectorAll('.card2')];so._orig.forEach(attach)}
+  so.querySelector('[data-sort-check]').onclick=()=>{let ok=0,placed=0;const n=so.querySelectorAll('.card2').length;
+    so.querySelectorAll('.bin .card2').forEach(c=>{placed++;const r=c.dataset.g===c.parentElement.dataset.g;
+      c.classList.remove('right','wrong');void c.offsetWidth;c.classList.add(r?'right':'wrong');if(r)ok++});
+    msg.innerHTML=ok===n?'<span class="eqok">Усе правильно! 🎉</span>':placed<n?`Правильно ${ok}; ще не розподілено: ${n-placed}`:`Правильно ${ok} з ${n}. Перенесіть червоні картки`};
+  so.reset=fill;
+  const rb=so.querySelector('[data-sort-reset]');rb.onclick=fill;if(so.dataset.gen)rb.textContent='Нові рівняння';
+  fill();
+});
+document.querySelectorAll('.ans').forEach(a=>a.onclick=()=>a.classList.toggle('open'));
+document.querySelectorAll('.opt').forEach(o=>o.onclick=()=>{o.classList.remove('right','wrong');o.classList.add(o.dataset.ok==='1'?'right':'wrong')});
+for(const id in F){const h=document.getElementById(id);if(h)F[id](h)}
+// ---------- задача 3: точки й побудову роблять учні ----------
+let T3=null;
+function genT3(){if(!document.getElementById('t3Eq'))return;
+  const gcd=(p,q)=>q?gcd(q,p%q):Math.abs(p);let x0,y0,a,b,c;
+  do{x0=nz(4);y0=nz(4)}while((x0*y0)%2||(Math.abs(x0)<2&&Math.abs(y0)<2));
+  a=y0;b=x0;c=-x0*y0;const g=gcd(gcd(a,b),c);a/=g;b/=g;c/=g;if(a<0){a=-a;b=-b;c=-c}
+  T3={a,b,c,x0,y0};document.getElementById('t3Eq').textContent=lin([[a,'x'],[b,'y'],[c,'']])+' = 0';
+  document.getElementById('t3Box').innerHTML=axSteps(T3,true);document.getElementById('t3Ans').textContent=`Відповідь: A(${M(x0)}; 0), B(0; ${M(y0)})`;document.getElementById('t3Ans').closest('.ansblk').classList.remove('done');
+  genT3a();
+  const sl=document.getElementById('t3Eq').closest('.slide');clearInputs(sl);if(F.figT3.clear)F.figT3.clear();lastInput=null}
+function genT3a(){const box=document.getElementById('t3aBox');if(!box||!T3)return;const {a,b,c,x0,y0}=T3;
+  const B=v=>`<input inputmode="none" class="num sm" inputmode="none" data-a="${M(v)}" autocomplete="off">`,ox=Math.abs(x0),oy=Math.abs(y0);
+  document.getElementById('t3aEq').textContent=lin([[a,'x'],[b,'y'],[c,'']])+' = 0';
+  box.innerHTML=`<div class="gl">Точки перетину з осями: <span class="cx">A</span>(${M(x0)}; 0), &nbsp;<span class="cy">B</span>(0; ${M(y0)})</div>
+  <div class="gl">Трикутник AOB прямокутний, ∠O = ${B(90)}°</div>
+  <div class="gl">Катети: &nbsp;<span class="cx">OA</span> = ${B(ox)}, &nbsp; <span class="cy">OB</span> = ${B(oy)}</div>
+  <div class="gl">S = <span class="fr"><span>1</span><span>2</span></span> · <span class="cx">OA</span> · <span class="cy">OB</span></div>
+  <div class="gl">S = <span class="fr"><span>1</span><span>2</span></span> · ${B(ox)} · ${B(oy)}</div>
+  <div class="gl">S = ${B(ox*oy/2)}</div>
+  <div class="gl z4ans">Відповідь: S = ${ox*oy/2}</div>`;box.closest('.ansblk').classList.remove('done');
+  const sl=box.closest('.slide');clearInputs(sl);
+  const h=document.getElementById('t3aFig');h.innerHTML='';const g=new Grid(h,-5,5,-5,5,38);
+  g.poly([[x0,0],[0,0],[0,y0]]);g.ra([0,0],[Math.sign(x0),0],[0,Math.sign(y0)],.4);
+  g.line(a,b,c,{cls:'c1'});
+  g.seg([0,0],[x0,0],{cls:'leg'});g.seg([0,0],[0,y0],{cls:'leg'});
+  g.pt(x0,0,{label:'A',dx:x0>0?6:-26,dy:y0>0?24:-12});g.pt(0,y0,{label:'B',dx:x0>0?-28:10,dy:y0>0?-6:24});}
+function checkT3(sl){const m=sl.querySelector('[data-msg]');const txt=m.innerHTML;const st=F.figT3.state();
+  const A=[T3.x0,0],B=[0,T3.y0],has=p=>st.pts.some(q=>q[0]===p[0]&&q[1]===p[1]);
+  const on=p=>st.line&&(st.line[1][0]-st.line[0][0])*(p[1]-st.line[0][1])-(st.line[1][1]-st.line[0][1])*(p[0]-st.line[0][0])===0;
+  let d;if(!has(A)||!has(B))d=st.pts.length<2?'Поставте на малюнку обидві точки A і B.':'Точки на малюнку поставлено не туди.';
+  else if(!st.line)d='Тепер проведіть пряму через A і B.';
+  else if(!on(A)||!on(B))d='Пряма не проходить через A і B.';
+  else d=null;
+  m.innerHTML=txt+'<br>'+(d?`<span class="eqno">Малюнок: ${d}</span>`:'<span class="eqok">Малюнок: правильно! ✓</span>')}
+document.getElementById('t3New').onclick=genT3;
+document.getElementById('t3Clear').onclick=()=>{F.figT3.clear();const m=document.getElementById('t3Eq').closest('.slide').querySelector('[data-msg]');m.innerHTML=''};
+// ---------- знаки k і l за рисунком ----------
+function genSg(){if(!document.getElementById('sgQ1'))return;
+  const sg=v=>v>0?'>':v<0?'<':'=';const used=new Set();const cls=['c1','c3','c2','c4'];
+  for(let i=1;i<=4;i++){let k,l,key,g=0;
+    do{k=pickOne([-2,-1,-0.5,0.5,1,2,-1.5,1.5,0]);l=pickOne([-3,-2,-1,0,1,2,3]);if(k===0&&l===0)continue;key=sg(k)+sg(l)}while((used.has(key)||k===0&&l===0)&&g++<100);
+    used.add(key);const h=document.getElementById('sgQ'+i);h.innerHTML='';mini(h,k,l,{cls:cls[i-1]});
+    document.querySelector(`.sgp[data-v="k${i}"]`).dataset.a=sg(k);document.querySelector(`.sgp[data-v="l${i}"]`).dataset.a=sg(l)}
+  document.querySelectorAll('.sgp').forEach(p=>{p.classList.remove('right','wrong');p.querySelector('select').value=''});
+  document.getElementById('sgMsg').innerHTML=''}
+document.querySelectorAll('.sgp select').forEach(sel=>sel.onchange=()=>{sel.parentNode.classList.remove('right','wrong');document.getElementById('sgMsg').innerHTML=''});
+document.getElementById('sgCheck').onclick=()=>{let ok=0,n=0,empty=0;
+  document.querySelectorAll('.sgp').forEach(p=>{n++;const v=p.querySelector('select').value;if(!v){empty++;p.classList.remove('right','wrong');return}
+    const r=v===p.dataset.a;p.classList.toggle('right',r);p.classList.toggle('wrong',!r);if(r)ok++});
+  document.getElementById('sgMsg').innerHTML=ok===n?'<span class="eqok">Усе правильно! 🎉</span>':`Правильно ${ok} з ${n}`+(empty?` (не заповнено: ${empty})`:'')};
+document.getElementById('sgNew').onclick=genSg;
+// ---------- задача 4: розв'язання стовпчиком з пропусками ----------
+function genZ4(){const box=document.getElementById('z4Box');if(!box)return;
+  const B=v=>`<input inputmode="none" class="num sm" inputmode="none" data-a="${M(v)}" autocomplete="off">`;
+  const kx=k=>k===1?'x':'−x',P=v=>v<0?`(${M(v)})`:M(v),pl=v=>v<0?`− ${-v}`:`+ ${v}`;
+  const A1=Math.random()<.5?45:135,A2=A1===45?135:45,k1=A1===45?1:-1,k2=-k1;
+  const l1=nz(5),m=nz(4),yM=nz(5),l2=yM-k2*m;
+  box.innerHTML=`<div class="two"><div>
+  <p>а) Пряма утворює з додатним напрямом осі Ox кут <b>${A1}°</b> і перетинає вісь Oy у точці <b style="white-space:nowrap">(0; ${M(l1)})</b>. Складіть її рівняння.</p>
+  <div class="gl">y = kx + <i class="v">l</i></div>
+  <div class="gl">k = tg ${A1}° = ${B(k1)}</div>
+  <div class="gl">Перетин з Oy: (0; ${M(l1)})</div>
+  <div class="gl"><i class="v">l</i> = ${B(l1)}</div>
+  <div class="gl" style="margin-top:8px"><b>Відповідь:</b> y = ${B(k1)}x + ${B(l1)}</div>
+  <div class="gl z4ans">Отже, y = ${kx(k1)} ${pl(l1)}</div>
+  </div><div>
+  <p>б) Пряма проходить через точку <b style="white-space:nowrap">M(${M(m)}; ${M(yM)})</b> і утворює з додатним напрямом осі Ox кут <b>${A2}°</b>. Складіть її рівняння.</p>
+  <div class="gl">y = kx + <i class="v">l</i></div>
+  <div class="gl">k = tg ${A2}° = ${B(k2)}</div>
+  <div class="gl">y = ${kx(k2)} + <i class="v">l</i></div>
+  <div class="gl">M: x = ${B(m)}, y = ${B(yM)}</div>
+  <div class="gl">${M(yM)} = ${k2===1?M(m):'−'+P(m)} + <i class="v">l</i></div>
+  <div class="gl">${M(yM)} = ${B(k2*m)} + <i class="v">l</i></div>
+  <div class="gl"><i class="v">l</i> = ${B(l2)}</div>
+  <div class="gl" style="margin-top:8px"><b>Відповідь:</b> y = ${B(k2)}x + ${B(l2)}</div>
+  <div class="gl z4ans">Отже, y = ${kx(k2)}${l2?' '+pl(l2):''}</div>
+  </div></div>`;
+  const sl=box.closest('.slide');clearInputs(sl);lastInput=null}
+document.getElementById('z4New').onclick=genZ4;
+genT3();genSg();genZ4();
+document.querySelectorAll('.sch').forEach(h=>{const k=+h.dataset.k,l=+h.dataset.l,S=12,P=v=>(v*S).toFixed(1);
+  const x1=-4,x2=4;let p1=[x1,k*x1+l],p2=[x2,k*x2+l];
+  if(Math.abs(k)>1e-9){const cl=x=>{const y=k*x+l;return y>4?[(4-l)/k,4]:y<-4?[(-4-l)/k,-4]:[x,y]};p1=cl(x1);p2=cl(x2)}
+  h.innerHTML=`<svg viewBox="-56 -56 112 112"><defs><marker id="ma" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0L10,5L0,10z" fill="#333"/></marker></defs>
+  <line x1="-54" y1="0" x2="54" y2="0" stroke="#333" stroke-width="2.5" marker-end="url(#ma)"/><line x1="0" y1="54" x2="0" y2="-54" stroke="#333" stroke-width="2.5" marker-end="url(#ma)"/>
+  <text x="44" y="16" font-size="15" font-style="italic" fill="#333">x</text><text x="6" y="-42" font-size="15" font-style="italic" fill="#333">y</text><text x="-12" y="15" font-size="13" fill="#333">O</text>
+  <line x1="${P(p1[0])}" y1="${P(-p1[1])}" x2="${P(p2[0])}" y2="${P(-p2[1])}" stroke="#c0532a" stroke-width="5" stroke-linecap="round"/></svg>`});
+// відкрити слайд з адреси (#5)
+const h=parseInt(location.hash.slice(1));go(isNaN(h)?0:h-1);
+</script>
+</body>
+</html>
